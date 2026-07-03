@@ -102,47 +102,32 @@
         line-height: 1.35;
       }
 
-      .progress {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.6rem;
-        margin-top: 1rem;
-      }
-
-      .stat {
-        padding: 0.75rem;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel-2);
-      }
-
-      .stat strong {
-        display: block;
-        font-size: 1.55rem;
-        line-height: 1;
-      }
-
-      .stat span {
-        display: block;
-        margin-top: 0.25rem;
-        color: var(--muted);
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .reference {
-        display: grid;
+      .toolbar-progress {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
         gap: 0.45rem;
       }
 
-      .reference img {
-        display: block;
-        width: 100%;
+      .progress-pill {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.28rem;
+        min-height: 2.35rem;
+        padding: 0 0.7rem;
         border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel);
-        box-shadow: var(--shadow);
+        border-radius: 7px;
+        background: var(--panel-2);
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .progress-pill strong {
+        color: var(--ink);
+        font-size: 0.98rem;
+        line-height: 1;
       }
 
       .toolbar {
@@ -199,14 +184,29 @@
       }
 
       .panel-toggle {
+        display: grid;
+        place-items: center;
+        width: 2.35rem;
         min-height: 2.35rem;
-        padding: 0 0.85rem;
+        padding: 0;
         border: 1px solid oklch(58% 0.11 224);
         border-radius: 7px;
         background: oklch(92% 0.055 222);
         color: oklch(27% 0.06 242);
-        font-weight: 850;
         transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
+      }
+
+      .menu-bars {
+        display: grid;
+        gap: 0.18rem;
+        width: 1rem;
+      }
+
+      .menu-bars span {
+        display: block;
+        height: 2px;
+        border-radius: 999px;
+        background: currentColor;
       }
 
       .chip {
@@ -318,7 +318,7 @@
         position: relative;
         isolation: isolate;
         display: grid;
-        grid-template-rows: 4.8rem auto auto;
+        grid-template-rows: 4.8rem minmax(2.65rem, auto) auto;
         gap: 0.38rem;
         min-height: 9.4rem;
         overflow: hidden;
@@ -363,21 +363,13 @@
         filter: drop-shadow(0 0.35rem 0.45rem oklch(28% 0.04 55 / 0.22));
       }
 
-      .sprite-crop {
-        display: block;
-        width: min(4.6rem, 88%);
-        height: min(4.4rem, 88%);
-        pointer-events: none;
-        filter: drop-shadow(0 0.35rem 0.45rem oklch(28% 0.04 55 / 0.22));
-      }
-
       .meta {
         position: relative;
         z-index: 1;
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.22rem 0.5rem;
         min-width: 0;
       }
 
@@ -396,6 +388,30 @@
         color: var(--muted);
         font-size: 0.76rem;
         font-weight: 800;
+      }
+
+      .variant-skill,
+      .availability {
+        grid-column: 1 / -1;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 750;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .availability {
+        justify-self: start;
+        padding: 0.12rem 0.42rem;
+        border: 1px solid oklch(78% 0.05 58);
+        border-radius: 999px;
+        background: oklch(94% 0.035 67);
+        color: oklch(42% 0.07 55);
+        text-transform: uppercase;
       }
 
       .toggles {
@@ -478,11 +494,6 @@
           display: none;
         }
 
-        .reference img {
-          max-height: 20rem;
-          object-fit: contain;
-        }
-
         .toolbar {
           top: 0.5rem;
         }
@@ -528,24 +539,7 @@
       <aside class="side">
         <section class="masthead" aria-labelledby="page-title">
           <h1 id="page-title">Sprite Tracker</h1>
-          <p class="subhead">Fortnite Runners, 70 sprite variants</p>
-          <div class="progress" aria-label="Progress">
-            <div class="stat">
-              <strong id="collectedCount">0/70</strong>
-              <span>Collected</span>
-            </div>
-            <div class="stat">
-              <strong id="masteredCount">0/70</strong>
-              <span>Mastered</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="reference" aria-label="Reference sheet">
-          <img
-            alt="Original Fortnite Runners sprite tracker reference"
-            src="assets/reference/sprite-tracker-reference.jpeg"
-          >
+          <p class="subhead">Fortnite Runners, <span id="spriteTotalLabel">61</span> sprite variants</p>
         </section>
 
         <section class="drawer" aria-label="Data">
@@ -564,7 +558,9 @@
           <div class="topline">
             <div class="toolbar-left">
               <div class="panel-control">
-                <button id="toggleSidebar" type="button" class="panel-toggle" aria-pressed="false">Hide panel</button>
+                <button id="toggleSidebar" type="button" class="panel-toggle" aria-pressed="false" aria-label="Hide panel">
+                  <span class="menu-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+                </button>
               </div>
               <div class="filters" aria-label="Filters">
                 <button class="chip active" type="button" data-filter="all">All</button>
@@ -572,6 +568,11 @@
                 <button class="chip" type="button" data-filter="collected">Collected</button>
                 <button class="chip" type="button" data-filter="mastered">Mastered</button>
                 <button class="chip" type="button" data-filter="hide-mastered">Hide mastered</button>
+                <button class="chip" id="toggleUnreleased" type="button" aria-pressed="false">Unreleased</button>
+              </div>
+              <div class="toolbar-progress" aria-label="Progress">
+                <span class="progress-pill"><strong id="collectedCount">0/61</strong> Collected</span>
+                <span class="progress-pill"><strong id="masteredCount">0/61</strong> Mastered</span>
               </div>
             </div>
             <input class="search" id="search" type="search" placeholder="Search" aria-label="Search sprites">
@@ -585,187 +586,117 @@
       const STORAGE_KEY = "spriteTrackerState";
       const SIDEBAR_KEY = "spriteTrackerSidebarCollapsed";
       const FILTER_KEY = "spriteTrackerActiveFilter";
+      const UNRELEASED_KEY = "spriteTrackerShowUnreleased";
       const SERVER_STATE_URL = location.protocol === "file:"
         ? "http://127.0.0.1:8765/api/state"
         : "/api/state";
       const spriteGrid = document.querySelector("#spriteGrid");
       const collectedCount = document.querySelector("#collectedCount");
       const masteredCount = document.querySelector("#masteredCount");
+      const spriteTotalLabel = document.querySelector("#spriteTotalLabel");
       const dataBox = document.querySelector("#dataBox");
       const status = document.querySelector("#status");
       const search = document.querySelector("#search");
       const toggleSidebar = document.querySelector("#toggleSidebar");
+      const toggleUnreleased = document.querySelector("#toggleUnreleased");
       const validFilters = ["all", "missing", "collected", "mastered", "hide-mastered"];
       let activeFilter = validFilters.includes(localStorage.getItem(FILTER_KEY))
         ? localStorage.getItem(FILTER_KEY)
         : "all";
+      let showUnreleased = localStorage.getItem(UNRELEASED_KEY) === "true";
       let serverStateAvailable = false;
 
-      const V4110_SOURCE = "assets/reference/fnassist-v4110-sprites.jpg";
-      const V4110_SOURCE_LABEL = "FNAssist v41.10";
-      const V4110_CELL_SIZE = 512;
-      const V4110_CROP_INSET = 72;
-      const V4110_COLUMN_X = [0, 512, 1024, 1536, 2048, 2560, 3072];
-      const V4110_ROW_Y = [0, 512, 1024, 1536, 2048];
-
-      function makeV4110Crop(column, row) {
-        return [
-          V4110_COLUMN_X[column] + V4110_CROP_INSET,
-          V4110_ROW_Y[row] + V4110_CROP_INSET,
-          V4110_CELL_SIZE - V4110_CROP_INSET * 2,
-          V4110_CELL_SIZE - V4110_CROP_INSET * 2,
-        ];
-      }
-
-      const V4110_CROPS = {
-        grimReaper: [
-          makeV4110Crop(0, 0),
-          makeV4110Crop(0, 1),
-          makeV4110Crop(0, 2),
-          makeV4110Crop(0, 3),
-        ],
-        soccerStriker: [
-          makeV4110Crop(1, 0),
-          makeV4110Crop(1, 1),
-          makeV4110Crop(1, 2),
-          makeV4110Crop(1, 3),
-          makeV4110Crop(0, 4),
-        ],
-        seven: [
-          makeV4110Crop(2, 0),
-          makeV4110Crop(2, 1),
-          makeV4110Crop(2, 2),
-          makeV4110Crop(2, 3),
-          makeV4110Crop(1, 4),
-        ],
-        fishy: [
-          makeV4110Crop(3, 0),
-          makeV4110Crop(3, 1),
-          makeV4110Crop(3, 2),
-          makeV4110Crop(3, 3),
-        ],
-        aura: [
-          makeV4110Crop(4, 0),
-          makeV4110Crop(4, 1),
-          makeV4110Crop(4, 2),
-          makeV4110Crop(4, 3),
-          makeV4110Crop(2, 4),
-        ],
-        air: [
-          makeV4110Crop(5, 0),
-          makeV4110Crop(5, 1),
-          makeV4110Crop(5, 2),
-          makeV4110Crop(5, 3),
-          makeV4110Crop(3, 4),
-        ],
-        boss: [
-          makeV4110Crop(6, 0),
-          makeV4110Crop(6, 1),
-          makeV4110Crop(6, 2),
-          makeV4110Crop(6, 3),
-        ],
-      };
-
       const spriteAssets = [
-        ["Mat1", "Water Sprite"],
-        ["Mat2", "Gold Water Sprite"],
-        ["Mat3", "Gummy Water Sprite"],
-        ["Mat4", "Galaxy Water Sprite"],
-        ["Mat5", "Gem Water Sprite"],
-        ["Mat6", "Holofoil Water Sprite"],
-        ["Mat7", "Earth Sprite"],
-        ["Mat8", "Gold Earth Sprite"],
-        ["Mat9", "Gummy Earth Sprite"],
-        ["Mat10", "Galaxy Earth Sprite"],
-        ["Mat11", "Gem Earth Sprite"],
-        ["Mat12", "Cube Earth Sprite"],
-        ["Mat13", "Fire Sprite"],
-        ["Mat14", "Gold Fire Sprite"],
-        ["Mat15", "Gummy Fire Sprite"],
-        ["Mat16", "Galaxy Fire Sprite"],
-        ["Mat17", "Holofoil Fire Sprite"],
-        ["Mat18", "Cube Fire Sprite"],
-        ["Mat19", "Duck Sprite"],
-        ["Mat20", "Gold Duck Sprite"],
-        ["Mat21", "Gummy Duck Sprite"],
-        ["Mat22", "Galaxy Duck Sprite"],
-        ["Mat23", "Gem Duck Sprite"],
-        ["Mat24", "Ghost Sprite"],
-        ["Mat25", "Gold Ghost Sprite"],
-        ["Mat26", "Gummy Ghost Sprite"],
-        ["Mat27", "Galaxy Ghost Sprite"],
-        ["Mat28", "Holofoil Ghost Sprite"],
-        ["Mat29", "Demon Sprite"],
-        ["Mat30", "Gold Demon Sprite"],
-        ["Mat31", "Gummy Demon Sprite"],
-        ["Mat32", "Galaxy Demon Sprite"],
-        ["Mat33", "Gem Demon Sprite"],
-        ["Mat34", "King Sprite"],
-        ["Mat35", "Gold King Sprite"],
-        ["Mat36", "Gummy King Sprite"],
-        ["Mat37", "Galaxy King Sprite"],
-        ["Mat38", "Holofoil King Sprite"],
-        ["Mat39", "Dream Sprite"],
-        ["Mat40", "Gold Dream Sprite"],
-        ["Mat41", "Gummy Dream Sprite"],
-        ["Mat42", "Galaxy Dream Sprite"],
-        ["Mat43", "Cube Dream Sprite"],
-        ["Mat44", "Punk Sprite"],
-        ["Mat45", "Gold Punk Sprite"],
-        ["Mat46", "Gummy Punk Sprite"],
-        ["Mat47", "Galaxy Punk Sprite"],
-        ["Mat48", "Cube Punk Sprite"],
-        ["Mat49", "TheBurntPeanut Sprite"],
-        ["Mat50", "Zero Point Sprite"],
-        ["Mat51", "Gold Zero Point Sprite"],
-        ["Mat52", "Gummy Zero Point Sprite"],
-        ["Mat53", "Galaxy Zero Point Sprite"],
-        ["Mat54", "Gem Zero Point Sprite"],
-        ["Mat55", "Quack Zero Point Sprite"],
-        ["v4110-grim-reaper", "Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[0], V4110_SOURCE_LABEL],
-        ["v4110-soccer-striker", "Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[0], V4110_SOURCE_LABEL],
-        ["v4110-seven", "Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[0], V4110_SOURCE_LABEL],
-        ["v4110-fishy", "Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[0], V4110_SOURCE_LABEL],
-        ["v4110-aura", "Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[0], V4110_SOURCE_LABEL],
-        ["v4110-air", "Air Sprite", V4110_SOURCE, V4110_CROPS.air[0], V4110_SOURCE_LABEL],
-        ["v4110-boss", "Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[0], V4110_SOURCE_LABEL],
-        ["v4110-gold-grim-reaper", "Gold Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[1], V4110_SOURCE_LABEL],
-        ["v4110-gold-soccer-striker", "Gold Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[1], V4110_SOURCE_LABEL],
-        ["v4110-gold-seven", "Gold Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[1], V4110_SOURCE_LABEL],
-        ["v4110-gold-fishy", "Gold Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[1], V4110_SOURCE_LABEL],
-        ["v4110-gold-aura", "Gold Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[1], V4110_SOURCE_LABEL],
-        ["v4110-gold-air", "Gold Air Sprite", V4110_SOURCE, V4110_CROPS.air[1], V4110_SOURCE_LABEL],
-        ["v4110-gold-boss", "Gold Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[1], V4110_SOURCE_LABEL],
-        ["v4110-gummy-grim-reaper", "Gummy Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[2], V4110_SOURCE_LABEL],
-        ["v4110-gummy-soccer-striker", "Gummy Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[2], V4110_SOURCE_LABEL],
-        ["v4110-gummy-seven", "Gummy Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[2], V4110_SOURCE_LABEL],
-        ["v4110-gummy-fishy", "Gummy Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[2], V4110_SOURCE_LABEL],
-        ["v4110-gummy-aura", "Gummy Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[2], V4110_SOURCE_LABEL],
-        ["v4110-gummy-air", "Gummy Air Sprite", V4110_SOURCE, V4110_CROPS.air[2], V4110_SOURCE_LABEL],
-        ["v4110-gummy-boss", "Gummy Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[2], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-grim-reaper", "Galaxy Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[3], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-soccer-striker", "Galaxy Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[3], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-seven", "Galaxy Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[3], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-fishy", "Galaxy Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[3], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-aura", "Galaxy Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[3], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-air", "Galaxy Air Sprite", V4110_SOURCE, V4110_CROPS.air[3], V4110_SOURCE_LABEL],
-        ["v4110-galaxy-boss", "Galaxy Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[3], V4110_SOURCE_LABEL],
-        ["v4110-holofoil-soccer-striker", "Holofoil Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[4], V4110_SOURCE_LABEL],
-        ["v4110-holofoil-seven", "Holofoil Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[4], V4110_SOURCE_LABEL],
-        ["v4110-holofoil-aura", "Holofoil Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[4], V4110_SOURCE_LABEL],
-        ["v4110-holofoil-air", "Holofoil Air Sprite", V4110_SOURCE, V4110_CROPS.air[4], V4110_SOURCE_LABEL],
+        { id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "12.83%", released: true, variant: "Base" },
+        { id: "mat2", name: "Gold Water Sprite", image: "assets/sprites/mat2.webp", rarity: "special", dropRate: "0.7%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat3", name: "Gummy Water Sprite", image: "assets/sprites/mat3.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat4", name: "Galaxy Water Sprite", image: "assets/sprites/mat4.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat5", name: "Gem Water Sprite", image: "assets/sprites/mat5.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "mat6", name: "Holofoil Water Sprite", image: "assets/sprites/mat6.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat7", name: "Earth Sprite", image: "assets/sprites/mat7.webp", rarity: "rare", dropRate: "12.83%", released: true, variant: "Base" },
+        { id: "mat8", name: "Gold Earth Sprite", image: "assets/sprites/mat8.webp", rarity: "special", dropRate: "0.7%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat9", name: "Gummy Earth Sprite", image: "assets/sprites/mat9.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat10", name: "Galaxy Earth Sprite", image: "assets/sprites/mat10.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat11", name: "Gem Earth Sprite", image: "assets/sprites/mat11.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "mat13", name: "Fire Sprite", image: "assets/sprites/mat13.webp", rarity: "rare", dropRate: "12.45%", released: true, variant: "Base" },
+        { id: "mat14", name: "Gold Fire Sprite", image: "assets/sprites/mat14.webp", rarity: "special", dropRate: "0.68%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat15", name: "Gummy Fire Sprite", image: "assets/sprites/mat15.webp", rarity: "special", dropRate: "0.68%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat16", name: "Galaxy Fire Sprite", image: "assets/sprites/mat16.webp", rarity: "special", dropRate: "0.27%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat17", name: "Holofoil Fire Sprite", image: "assets/sprites/mat17.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat19", name: "Duck Sprite", image: "assets/sprites/mat19.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
+        { id: "mat20", name: "Gold Duck Sprite", image: "assets/sprites/mat20.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat21", name: "Gummy Duck Sprite", image: "assets/sprites/mat21.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat22", name: "Galaxy Duck Sprite", image: "assets/sprites/mat22.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat23", name: "Gem Duck Sprite", image: "assets/sprites/mat23.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "mat24", name: "Ghost Sprite", image: "assets/sprites/mat24.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
+        { id: "mat25", name: "Gold Ghost Sprite", image: "assets/sprites/mat25.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat26", name: "Gummy Ghost Sprite", image: "assets/sprites/mat26.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat27", name: "Galaxy Ghost Sprite", image: "assets/sprites/mat27.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat28", name: "Holofoil Ghost Sprite", image: "assets/sprites/mat28.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat39", name: "Dream Sprite", image: "assets/sprites/mat39.webp", rarity: "legendary", dropRate: "2.63%", released: true, variant: "Base" },
+        { id: "mat40", name: "Gold Dream Sprite", image: "assets/sprites/mat40.webp", rarity: "special", dropRate: "0.03%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat41", name: "Gummy Dream Sprite", image: "assets/sprites/mat41.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat42", name: "Galaxy Dream Sprite", image: "assets/sprites/mat42.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat29", name: "Demon Sprite", image: "assets/sprites/mat29.webp", rarity: "epic", dropRate: "5.76%", released: true, variant: "Base" },
+        { id: "mat30", name: "Gold Demon Sprite", image: "assets/sprites/mat30.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat31", name: "Gummy Demon Sprite", image: "assets/sprites/mat31.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat32", name: "Galaxy Demon Sprite", image: "assets/sprites/mat32.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat33", name: "Gem Demon Sprite", image: "assets/sprites/mat33.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "mat44", name: "Punk Sprite", image: "assets/sprites/mat44.webp", rarity: "legendary", dropRate: "1.98%", released: true, variant: "Base" },
+        { id: "mat45", name: "Gold Punk Sprite", image: "assets/sprites/mat45.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat46", name: "Gummy Punk Sprite", image: "assets/sprites/mat46.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat47", name: "Galaxy Punk Sprite", image: "assets/sprites/mat47.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat34", name: "King Sprite", image: "assets/sprites/mat34.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
+        { id: "mat35", name: "Gold King Sprite", image: "assets/sprites/mat35.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat36", name: "Gummy King Sprite", image: "assets/sprites/mat36.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat37", name: "Galaxy King Sprite", image: "assets/sprites/mat37.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat38", name: "Holofoil King Sprite", image: "assets/sprites/mat38.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat49", name: "Burnt Peanut", image: "assets/sprites/mat49.webp", rarity: "mythic", dropRate: "1.01%", released: true, variant: "Base" },
+        { id: "mat50", name: "Zero Point Sprite", image: "assets/sprites/mat50.webp", rarity: "mythic", dropRate: "0.000098%", released: true, variant: "Base" },
+        { id: "mat51", name: "Gold Zero Point Sprite", image: "assets/sprites/mat51.webp", rarity: "special", dropRate: "0.0000012%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "mat52", name: "Gummy Zero Point Sprite", image: "assets/sprites/mat52.webp", rarity: "special", dropRate: "0.0000006%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "mat53", name: "Galaxy Zero Point Sprite", image: "assets/sprites/mat53.webp", rarity: "special", dropRate: "0.0000004%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat54", name: "Gem Zero Point Sprite", image: "assets/sprites/mat54.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "v4110-fishy", name: "Fishy Sprite", image: "assets/sprites/v4110-fishy.webp", rarity: "rare", dropRate: "13.79%", released: true, variant: "Base" },
+        { id: "v4110-gold-fishy", name: "Gold Fishy Sprite", image: "assets/sprites/v4110-gold-fishy.webp", rarity: "special", dropRate: "0.17%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-fishy", name: "Gummy Fishy Sprite", image: "assets/sprites/v4110-gummy-fishy.webp", rarity: "special", dropRate: "0.08%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-fishy", name: "Galaxy Fishy Sprite", image: "assets/sprites/v4110-galaxy-fishy.webp", rarity: "special", dropRate: "0.06%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-soccer-striker", name: "Striker Sprite", image: "assets/sprites/v4110-soccer-striker.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
+        { id: "v4110-gold-soccer-striker", name: "Gold Striker Sprite", image: "assets/sprites/v4110-gold-soccer-striker.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-soccer-striker", name: "Gummy Striker Sprite", image: "assets/sprites/v4110-gummy-soccer-striker.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-soccer-striker", name: "Galaxy Striker Sprite", image: "assets/sprites/v4110-galaxy-soccer-striker.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-holofoil-soccer-striker", name: "Holofoil Striker Sprite", image: "assets/sprites/v4110-holofoil-soccer-striker.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "v4110-aura", name: "Aura Sprite", image: "assets/sprites/v4110-aura.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
+        { id: "v4110-gold-aura", name: "Gold Aura Sprite", image: "assets/sprites/v4110-gold-aura.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-aura", name: "Gummy Aura Sprite", image: "assets/sprites/v4110-gummy-aura.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-aura", name: "Galaxy Aura Sprite", image: "assets/sprites/v4110-galaxy-aura.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-gem-aura", name: "Gem Aura Sprite", image: "assets/sprites/v4110-gem-aura.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "v4110-boss", name: "Boss Sprite", image: "assets/sprites/v4110-boss.webp", rarity: "legendary", dropRate: "2.63%", released: true, variant: "Base" },
+        { id: "v4110-gold-boss", name: "Gold Boss Sprite", image: "assets/sprites/v4110-gold-boss.webp", rarity: "special", dropRate: "0.03%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-boss", name: "Gummy Boss Sprite", image: "assets/sprites/v4110-gummy-boss.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-boss", name: "Galaxy Boss Sprite", image: "assets/sprites/v4110-galaxy-boss.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-grim-reaper", name: "Grim Sprite", image: "assets/sprites/v4110-grim-reaper.webp", rarity: "mythic", dropRate: "0.000098%", released: true, variant: "Base" },
+        { id: "v4110-gold-grim-reaper", name: "Gold Grim Sprite", image: "assets/sprites/v4110-gold-grim-reaper.webp", rarity: "special", dropRate: "0.0000012%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-grim-reaper", name: "Gummy Grim Sprite", image: "assets/sprites/v4110-gummy-grim-reaper.webp", rarity: "special", dropRate: "0.0000006%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-grim-reaper", name: "Galaxy Grim Sprite", image: "assets/sprites/v4110-galaxy-grim-reaper.webp", rarity: "special", dropRate: "0.0000004%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: false, variant: "Base" },
+        { id: "v4110-gold-air", name: "Gold Air Sprite", image: "assets/sprites/v4110-gold-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-air", name: "Gummy Air Sprite", image: "assets/sprites/v4110-gummy-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-air", name: "Galaxy Air Sprite", image: "assets/sprites/v4110-galaxy-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-holofoil-air", name: "Holofoil Air Sprite", image: "assets/sprites/v4110-holofoil-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "v4110-seven", name: "Seven Sprite", image: "assets/sprites/v4110-seven.webp", rarity: "legendary", dropRate: "0%", released: false, variant: "Base" },
+        { id: "v4110-gold-seven", name: "Gold Seven Sprite", image: "assets/sprites/v4110-gold-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-seven", name: "Gummy Seven Sprite", image: "assets/sprites/v4110-gummy-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-seven", name: "Galaxy Seven Sprite", image: "assets/sprites/v4110-galaxy-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-holofoil-seven", name: "Holofoil Seven Sprite", image: "assets/sprites/v4110-holofoil-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
       ];
-
-      const unavailableVariantPrefixes = ["Gem", "Holofoil", "Cube"];
-      const visibleSpriteAssets = spriteAssets.filter(([, name]) => (
-        !unavailableVariantPrefixes.some((prefix) => name.startsWith(`${prefix} `))
-      ));
-      const SPRITE_TOTAL = visibleSpriteAssets.length;
-      const variantPrefixes = ["Gold", "Gummy", "Galaxy", "Gem", "Holofoil", "Cube", "Quack"];
+      const SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length;
+      spriteTotalLabel.textContent = SPRITE_TOTAL;
+      const variantPrefixes = ["Gold", "Gummy", "Galaxy", "Gem", "Holofoil"];
       const spriteSkills = {
         "Earth Sprite": "Rare chest boost",
         "Fire Sprite": "Fire burst on damage",
-        "Water Sprite": "Water shield regen",
+        "Water Sprite": "Shield regen in water",
         "Duck Sprite": "Emote shield regen",
         "Demon Sprite": "Heal on elim",
         "Ghost Sprite": "Reload invisibility",
@@ -773,8 +704,10 @@
         "Punk Sprite": "Random chest bonus",
         "Dream Sprite": "Loot each level",
         "Zero Point Sprite": "Heal bubble",
-        "TheBurntPeanut Sprite": "Extra elim loot",
-        "Soccer Striker Sprite": "Overdrive on move",
+        "Burnt Peanut": "Extra elim loot",
+        "Fishy Sprite": "Swim/move speed boost",
+        "Striker Sprite": "Overdrive on mantle",
+        "Aura Sprite": "Shock Rock charge",
       };
       const groupOrder = [
         "Water Sprite",
@@ -786,24 +719,24 @@
         "Demon Sprite",
         "Punk Sprite",
         "King Sprite",
-        "TheBurntPeanut Sprite",
+        "Burnt Peanut",
         "Fishy Sprite",
-        "Soccer Striker Sprite",
+        "Striker Sprite",
         "Aura Sprite",
         "Boss Sprite",
+        "Grim Sprite",
+        "Air Sprite",
+        "Seven Sprite",
       ];
-      const assetBase = "assets/sprites";
-      const sprites = visibleSpriteAssets.map(([tag, name, customImage, crop, source], index) => {
-        const group = name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
+      const sprites = spriteAssets.map((sprite, index) => {
+        const group = sprite.name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
         return {
-          id: tag.toLowerCase(),
-          previousId: tag.startsWith("Mat") ? String(Number(tag.replace("Mat", "")) + 1) : "",
-          tag,
-          name,
+          ...sprite,
           group,
-          image: customImage || `${assetBase}/${tag.toLowerCase()}.png`,
-          crop,
-          source: source || "Fortnite-API",
+          tag: sprite.id,
+          previousId: sprite.id.startsWith("mat") ? String(Number(sprite.id.replace("mat", "")) + 1) : "",
+          source: "Fortnite.GG",
+          availability: sprite.released ? "released" : "unreleased",
           number: index + 1,
         };
       });
@@ -824,15 +757,16 @@
 
       function normalizeState(raw) {
         const source = raw && typeof raw === "object" ? raw : {};
-        return sprites.reduce((next, sprite) => {
+        const next = { ...source };
+        for (const sprite of sprites) {
           const existing = source[sprite.id] || source[sprite.previousId] || {};
           const mastered = Boolean(existing.mastered);
           next[sprite.id] = {
             collected: Boolean(existing.collected) || mastered,
             mastered,
           };
-          return next;
-        }, {});
+        }
+        return next;
       }
 
       function loadState() {
@@ -853,7 +787,8 @@
       }
 
       function mergeState(localState, serverState) {
-        return sprites.reduce((next, sprite) => {
+        const next = { ...serverState, ...localState };
+        for (const sprite of sprites) {
           const localItem = localState[sprite.id] || {};
           const serverItem = serverState[sprite.id] || {};
           const mastered = Boolean(localItem.mastered || serverItem.mastered);
@@ -861,8 +796,8 @@
             collected: Boolean(localItem.collected || serverItem.collected || mastered),
             mastered,
           };
-          return next;
-        }, {});
+        }
+        return next;
       }
 
       async function hydrateServerState() {
@@ -931,13 +866,10 @@
           card.className = "sprite-card";
           card.tabIndex = 0;
           card.dataset.id = sprite.id;
-          card.dataset.name = `${sprite.name} ${sprite.group} ${sprite.tag} ${sprite.source}`.toLowerCase();
-          const cropBox = sprite.crop ? cropViewBox(sprite.crop) : null;
-          const art = cropBox
-            ? `<svg class="sprite-crop" viewBox="${cropBox}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${sprite.name}">
-                <image href="${sprite.image}" x="0" y="0" width="3584" height="2560"></image>
-              </svg>`
-            : `<img class="sprite-image" src="${sprite.image}" alt="${sprite.name}" loading="lazy">`;
+          card.dataset.name = `${sprite.name} ${sprite.group} ${sprite.tag} ${sprite.source} ${sprite.rarity} ${sprite.dropRate} ${sprite.availability} ${sprite.variantSkill || ""}`.toLowerCase();
+          card.dataset.released = sprite.released ? "true" : "false";
+          card.title = [sprite.name, sprite.rarity, sprite.dropRate, sprite.availability, sprite.variantSkill].filter(Boolean).join(" - ");
+          const art = `<img class="sprite-image" src="${sprite.image}" alt="${sprite.name}" loading="lazy">`;
           card.innerHTML = `
             <div class="sprite-stage">
               ${art}
@@ -945,6 +877,8 @@
             <div class="meta">
               <span class="name">${sprite.name}</span>
               <span class="number">#${String(sprite.number).padStart(2, "0")}</span>
+              ${sprite.variantSkill ? `<span class="variant-skill" title="${sprite.variantSkill}">${sprite.variantSkill}</span>` : ""}
+              ${!sprite.released ? `<span class="availability">Unreleased</span>` : ""}
             </div>
             <div class="toggles">
               <button class="toggle" type="button" data-kind="collected" aria-label="Toggle collected for ${sprite.name}">Have</button>
@@ -954,11 +888,6 @@
           cards.append(card);
         }
         return row;
-      }
-
-      function cropViewBox(crop) {
-        const [cropX, cropY, cropWidth, cropHeight] = crop;
-        return [cropX, cropY, cropWidth, cropHeight].join(" ");
       }
 
       function toggleSprite(id, kind) {
@@ -979,8 +908,8 @@
         let mastered = 0;
         for (const sprite of sprites) {
           const item = state[sprite.id];
-          if (item.collected) collected += 1;
-          if (item.mastered) mastered += 1;
+          if (sprite.released && item.collected) collected += 1;
+          if (sprite.released && item.mastered) mastered += 1;
           const card = spriteGrid.querySelector(`[data-id="${sprite.id}"]`);
           if (!card) continue;
           card.querySelector('[data-kind="collected"]').classList.toggle("on", item.collected);
@@ -1000,13 +929,14 @@
           for (const card of row.querySelectorAll(".sprite-card")) {
             const matchesQuery = !query || card.dataset.name.includes(query);
             const item = state[card.dataset.id];
+            const matchesRelease = showUnreleased || card.dataset.released === "true";
             const matchesFilter =
               activeFilter === "all" ||
               (activeFilter === "missing" && !item.collected) ||
               (activeFilter === "collected" && item.collected) ||
               (activeFilter === "mastered" && item.mastered) ||
               (activeFilter === "hide-mastered" && !item.mastered);
-            const visible = matchesQuery && matchesFilter;
+            const visible = matchesRelease && matchesQuery && matchesFilter;
             card.classList.toggle("hidden", !visible);
             if (visible) visibleCards += 1;
           }
@@ -1047,11 +977,23 @@
         });
       });
 
+      function setShowUnreleased(next, persist = true) {
+        showUnreleased = Boolean(next);
+        toggleUnreleased.classList.toggle("active", showUnreleased);
+        toggleUnreleased.setAttribute("aria-pressed", showUnreleased ? "true" : "false");
+        if (persist) localStorage.setItem(UNRELEASED_KEY, showUnreleased ? "true" : "false");
+        applyFilters();
+      }
+
+      toggleUnreleased.addEventListener("click", () => {
+        setShowUnreleased(!showUnreleased);
+      });
+
       search.addEventListener("input", applyFilters);
 
       function setSidebarCollapsed(collapsed) {
         document.body.classList.toggle("side-collapsed", collapsed);
-        toggleSidebar.textContent = collapsed ? "Show panel" : "Hide panel";
+        toggleSidebar.setAttribute("aria-label", collapsed ? "Show panel" : "Hide panel");
         toggleSidebar.setAttribute("aria-pressed", collapsed ? "true" : "false");
         localStorage.setItem(SIDEBAR_KEY, collapsed ? "true" : "false");
       }
@@ -1068,14 +1010,7 @@
       document.querySelector("#importData").addEventListener("click", () => {
         try {
           const imported = JSON.parse(dataBox.value);
-          state = sprites.reduce((next, sprite) => {
-            const existing = imported[sprite.id] || {};
-            next[sprite.id] = {
-              collected: Boolean(existing.collected || existing.mastered),
-              mastered: Boolean(existing.mastered),
-            };
-            return next;
-          }, {});
+          state = normalizeState(imported);
           saveState();
           syncAll();
           status.textContent = "Imported.";
@@ -1094,6 +1029,7 @@
 
       setSidebarCollapsed(localStorage.getItem(SIDEBAR_KEY) === "true");
       setActiveFilter(localStorage.getItem(FILTER_KEY), false);
+      setShowUnreleased(showUnreleased, false);
       renderSprites();
       hydrateServerState();
     </script>
