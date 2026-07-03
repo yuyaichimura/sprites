@@ -584,6 +584,7 @@
     <script>
       const STORAGE_KEY = "spriteTrackerState";
       const SIDEBAR_KEY = "spriteTrackerSidebarCollapsed";
+      const FILTER_KEY = "spriteTrackerActiveFilter";
       const SERVER_STATE_URL = location.protocol === "file:"
         ? "http://127.0.0.1:8765/api/state"
         : "/api/state";
@@ -594,7 +595,10 @@
       const status = document.querySelector("#status");
       const search = document.querySelector("#search");
       const toggleSidebar = document.querySelector("#toggleSidebar");
-      let activeFilter = "all";
+      const validFilters = ["all", "missing", "collected", "mastered", "hide-mastered"];
+      let activeFilter = validFilters.includes(localStorage.getItem(FILTER_KEY))
+        ? localStorage.getItem(FILTER_KEY)
+        : "all";
       let serverStateAvailable = false;
 
       const V4110_SOURCE = "assets/reference/fnassist-v4110-sprites.jpg";
@@ -1028,13 +1032,18 @@
         }
       });
 
+      function setActiveFilter(filter, persist = true) {
+        activeFilter = validFilters.includes(filter) ? filter : "all";
+        document.querySelectorAll("[data-filter]").forEach((item) => {
+          item.classList.toggle("active", item.dataset.filter === activeFilter);
+        });
+        if (persist) localStorage.setItem(FILTER_KEY, activeFilter);
+        applyFilters();
+      }
+
       document.querySelectorAll("[data-filter]").forEach((button) => {
         button.addEventListener("click", () => {
-          activeFilter = button.dataset.filter;
-          document.querySelectorAll("[data-filter]").forEach((item) => {
-            item.classList.toggle("active", item === button);
-          });
-          applyFilters();
+          setActiveFilter(button.dataset.filter);
         });
       });
 
@@ -1084,6 +1093,7 @@
       });
 
       setSidebarCollapsed(localStorage.getItem(SIDEBAR_KEY) === "true");
+      setActiveFilter(localStorage.getItem(FILTER_KEY), false);
       renderSprites();
       hydrateServerState();
     </script>
