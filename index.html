@@ -109,6 +109,12 @@
         gap: 0.45rem;
       }
 
+      .mobile-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+
       .progress-pill {
         display: inline-flex;
         align-items: baseline;
@@ -208,6 +214,11 @@
         gap: 0.6rem;
       }
 
+      .toolbar-menu {
+        display: grid;
+        gap: 0.75rem;
+      }
+
       .toolbar-left {
         display: flex;
         flex-wrap: wrap;
@@ -240,7 +251,8 @@
         border-right: 1px solid var(--line);
       }
 
-      .panel-toggle {
+      .panel-toggle,
+      .controls-toggle {
         display: grid;
         place-items: center;
         width: 2.35rem;
@@ -251,6 +263,16 @@
         background: oklch(92% 0.055 222);
         color: oklch(27% 0.06 242);
         transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
+      }
+
+      .cog-icon {
+        font-size: 1.18rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .controls-toggle {
+        display: none;
       }
 
       .menu-bars {
@@ -276,6 +298,7 @@
 
       .chip:hover,
       .panel-toggle:hover,
+      .controls-toggle:hover,
       .tool:hover {
         transform: translateY(-1px);
         border-color: oklch(64% 0.13 78);
@@ -299,6 +322,7 @@
       .search:focus,
       .chip:focus-visible,
       .panel-toggle:focus-visible,
+      .controls-toggle:focus-visible,
       .tool:focus-visible,
       .toggle:focus-visible,
       .sprite-card:focus-visible {
@@ -647,6 +671,35 @@
           padding-right: 0;
           border-right: 0;
         }
+
+        .controls-toggle {
+          display: grid;
+        }
+
+        .toolbar-left {
+          flex: 1 1 auto;
+          justify-content: space-between;
+        }
+
+        .toolbar-menu {
+          display: none;
+          padding-top: 0.65rem;
+          border-top: 1px solid var(--line);
+        }
+
+        body.controls-open .toolbar-menu {
+          display: grid;
+        }
+
+        body.controls-open .controls-toggle {
+          border-color: var(--accent);
+          background: oklch(91% 0.085 50);
+        }
+
+        .variant-reference {
+          max-height: 5.8rem;
+          overflow: auto;
+        }
       }
 
       @media (max-width: 560px) {
@@ -670,7 +723,42 @@
         }
 
         .topline {
-          align-items: stretch;
+          align-items: center;
+        }
+
+        .toolbar {
+          gap: 0;
+          padding: 0.55rem;
+        }
+
+        .toolbar-left {
+          gap: 0.45rem;
+        }
+
+        .toolbar-progress {
+          flex: 1 1 auto;
+          justify-content: flex-end;
+          gap: 0.35rem;
+        }
+
+        .progress-pill {
+          min-height: 2.25rem;
+          padding: 0.12rem 0.5rem;
+          font-size: 0.64rem;
+        }
+
+        .progress-pill strong {
+          font-size: 1.08rem;
+        }
+
+        .filters {
+          gap: 0.35rem;
+        }
+
+        .chip {
+          min-height: 2.1rem;
+          padding: 0 0.58rem;
+          font-size: 0.82rem;
         }
 
         .search {
@@ -700,32 +788,37 @@
 
       <main class="main">
         <nav class="toolbar" aria-label="Tracker controls">
-          <div class="variant-reference" aria-label="Variant effects">
-            <span class="variant-ref-chip gold"><strong>Gold</strong> 3x elim XP</span>
-            <span class="variant-ref-chip gummy"><strong>Gummy</strong> +20% Sprite Dust</span>
-            <span class="variant-ref-chip galaxy"><strong>Galaxy</strong> +30% ammo</span>
-            <span class="variant-ref-chip gem"><strong>Gem</strong> -30% fall damage</span>
-            <span class="variant-ref-chip holofoil"><strong>Holofoil</strong> +rare variant chest chance</span>
-          </div>
           <div class="topline">
             <div class="toolbar-left">
-              <div class="panel-control">
+              <div class="mobile-controls">
                 <button id="toggleSidebar" type="button" class="panel-toggle" aria-pressed="false" aria-label="Hide panel">
+                  <span class="cog-icon" aria-hidden="true">&#9881;</span>
+                </button>
+                <button id="toggleControls" type="button" class="controls-toggle" aria-expanded="false" aria-label="Show filters">
                   <span class="menu-bars" aria-hidden="true"><span></span><span></span><span></span></span>
                 </button>
-              </div>
-              <div class="filters" aria-label="Filters">
-                <button class="chip active" type="button" data-filter="all">All</button>
-                <button class="chip" type="button" data-filter="missing">Missing</button>
-                <button class="chip" type="button" data-filter="collected">Collected</button>
-                <button class="chip" type="button" data-filter="mastered">Mastered</button>
-                <button class="chip" type="button" data-filter="hide-mastered">Hide mastered</button>
-                <button class="chip" id="toggleUnreleased" type="button" aria-pressed="false">Unreleased</button>
               </div>
               <div class="toolbar-progress" aria-label="Progress">
                 <span class="progress-pill"><strong id="collectedCount">0/61</strong> Collected</span>
                 <span class="progress-pill"><strong id="masteredCount">0/61</strong> Mastered</span>
               </div>
+            </div>
+          </div>
+          <div class="toolbar-menu" id="toolbarMenu">
+            <div class="variant-reference" aria-label="Variant effects">
+              <span class="variant-ref-chip gold"><strong>Gold</strong> 3x elim XP</span>
+              <span class="variant-ref-chip gummy"><strong>Gummy</strong> +20% Sprite Dust</span>
+              <span class="variant-ref-chip galaxy"><strong>Galaxy</strong> +30% ammo</span>
+              <span class="variant-ref-chip gem"><strong>Gem</strong> -30% fall damage</span>
+              <span class="variant-ref-chip holofoil"><strong>Holofoil</strong> +rare variant chest chance</span>
+            </div>
+            <div class="filters" aria-label="Filters">
+              <button class="chip active" type="button" data-filter="all">All</button>
+              <button class="chip" type="button" data-filter="missing">Missing</button>
+              <button class="chip" type="button" data-filter="collected">Collected</button>
+              <button class="chip" type="button" data-filter="mastered">Mastered</button>
+              <button class="chip" type="button" data-filter="hide-mastered">Hide mastered</button>
+              <button class="chip" id="toggleUnreleased" type="button" aria-pressed="false">Unreleased</button>
             </div>
             <input class="search" id="search" type="search" placeholder="Search" aria-label="Search sprites">
           </div>
@@ -750,6 +843,7 @@
       const status = document.querySelector("#status");
       const search = document.querySelector("#search");
       const toggleSidebar = document.querySelector("#toggleSidebar");
+      const toggleControls = document.querySelector("#toggleControls");
       const toggleUnreleased = document.querySelector("#toggleUnreleased");
       const validFilters = ["all", "missing", "collected", "mastered", "hide-mastered"];
       let activeFilter = validFilters.includes(localStorage.getItem(FILTER_KEY))
@@ -1184,6 +1278,16 @@
 
       toggleSidebar.addEventListener("click", () => {
         setSidebarCollapsed(!document.body.classList.contains("side-collapsed"));
+      });
+
+      function setControlsOpen(open) {
+        document.body.classList.toggle("controls-open", open);
+        toggleControls.setAttribute("aria-expanded", open ? "true" : "false");
+        toggleControls.setAttribute("aria-label", open ? "Hide filters" : "Show filters");
+      }
+
+      toggleControls.addEventListener("click", () => {
+        setControlsOpen(!document.body.classList.contains("controls-open"));
       });
 
       document.querySelector("#exportData").addEventListener("click", () => {

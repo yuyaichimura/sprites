@@ -133,6 +133,12 @@ def test_tracker_has_collapsible_sidebar_and_file_sync():
     assert "panel-control" in html
     assert "panel-toggle" in html
     assert "menu-bars" in html
+    assert "toggleControls" in html
+    assert "controls-open" in html
+    assert "toolbar-menu" in html
+    assert "mobile-controls" in html
+    assert "cog-icon" in html
+    assert 'aria-label="Show filters"' in html
     assert 'aria-label="Hide panel"' in html
     assert 'toggleSidebar.setAttribute("aria-label"' in html
     assert "SERVER_STATE_URL" in html
