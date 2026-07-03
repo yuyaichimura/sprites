@@ -35,6 +35,7 @@ def test_tracker_has_progress_and_filtering():
 
     assert "toolbar-progress" in html
     assert "progress-pill" in html
+    assert "font-size: 1.32rem" in html
     assert "collectedCount" in html
     assert "masteredCount" in html
     assert "data-filter" in html

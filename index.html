@@ -112,22 +112,25 @@
       .progress-pill {
         display: inline-flex;
         align-items: baseline;
-        gap: 0.28rem;
-        min-height: 2.35rem;
-        padding: 0 0.7rem;
+        gap: 0.34rem;
+        min-height: 2.55rem;
+        padding: 0.15rem 0.72rem;
         border: 1px solid var(--line);
         border-radius: 7px;
         background: var(--panel-2);
         color: var(--muted);
-        font-size: 0.78rem;
-        font-weight: 800;
+        font-size: 0.72rem;
+        font-weight: 850;
+        text-transform: uppercase;
         white-space: nowrap;
       }
 
       .progress-pill strong {
         color: var(--ink);
-        font-size: 0.98rem;
+        font-size: 1.32rem;
+        font-weight: 900;
         line-height: 1;
+        text-transform: none;
       }
 
       .toolbar {
@@ -390,28 +393,72 @@
         font-weight: 800;
       }
 
-      .variant-skill,
-      .availability {
+      .badges {
         grid-column: 1 / -1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
         min-width: 0;
+      }
+
+      .variant-chip,
+      .availability {
+        display: inline-flex;
+        align-items: center;
         max-width: 100%;
+        min-height: 1.15rem;
+        padding: 0.12rem 0.44rem;
         overflow: hidden;
-        color: var(--muted);
-        font-size: 0.7rem;
-        font-weight: 750;
-        line-height: 1.15;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 0.66rem;
+        font-weight: 900;
+        line-height: 1;
         text-overflow: ellipsis;
+        text-transform: uppercase;
         white-space: nowrap;
       }
 
+      .variant-chip.base {
+        border-color: oklch(79% 0.025 250);
+        background: oklch(94% 0.012 250);
+        color: oklch(38% 0.04 255);
+      }
+
+      .variant-chip.gold {
+        border-color: oklch(74% 0.13 83);
+        background: oklch(88% 0.15 91);
+        color: oklch(35% 0.08 78);
+      }
+
+      .variant-chip.gummy {
+        border-color: oklch(76% 0.14 345);
+        background: oklch(90% 0.09 348);
+        color: oklch(39% 0.1 350);
+      }
+
+      .variant-chip.galaxy {
+        border-color: oklch(67% 0.16 300);
+        background: oklch(87% 0.09 302);
+        color: oklch(34% 0.1 292);
+      }
+
+      .variant-chip.gem {
+        border-color: oklch(79% 0.045 190);
+        background: oklch(93% 0.035 195);
+        color: oklch(34% 0.055 200);
+      }
+
+      .variant-chip.holofoil {
+        border-color: oklch(76% 0.1 225);
+        background: oklch(91% 0.055 225);
+        color: oklch(34% 0.075 235);
+      }
+
       .availability {
-        justify-self: start;
-        padding: 0.12rem 0.42rem;
-        border: 1px solid oklch(78% 0.05 58);
-        border-radius: 999px;
+        border-color: oklch(78% 0.05 58);
         background: oklch(94% 0.035 67);
         color: oklch(42% 0.07 55);
-        text-transform: uppercase;
       }
 
       .toggles {
@@ -877,8 +924,10 @@
             <div class="meta">
               <span class="name">${sprite.name}</span>
               <span class="number">#${String(sprite.number).padStart(2, "0")}</span>
-              ${sprite.variantSkill ? `<span class="variant-skill" title="${sprite.variantSkill}">${sprite.variantSkill}</span>` : ""}
-              ${!sprite.released ? `<span class="availability">Unreleased</span>` : ""}
+              <div class="badges">
+                <span class="variant-chip ${sprite.variantClass}" title="${sprite.variantSkill || sprite.variant}">${sprite.variant}</span>
+                ${!sprite.released ? `<span class="availability">Unreleased</span>` : ""}
+              </div>
             </div>
             <div class="toggles">
               <button class="toggle" type="button" data-kind="collected" aria-label="Toggle collected for ${sprite.name}">Have</button>
