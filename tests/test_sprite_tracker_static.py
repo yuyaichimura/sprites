@@ -21,11 +21,11 @@ def test_tracker_has_collected_and_mastered_controls():
     assert "spriteTrackerState" in html
 
 
-def test_tracker_renders_full_reference_count():
+def test_tracker_renders_visible_reference_count():
     html = INDEX.read_text()
 
-    assert "SPRITE_TOTAL = spriteAssets.length" in html
-    assert "87 sprite variants" in html
+    assert "SPRITE_TOTAL = visibleSpriteAssets.length" in html
+    assert "70 sprite variants" in html
 
 
 def test_tracker_has_progress_and_filtering():
@@ -35,6 +35,11 @@ def test_tracker_has_progress_and_filtering():
     assert "masteredCount" in html
     assert "data-filter" in html
     assert 'data-filter="hide-mastered"' in html
+    assert "FILTER_KEY" in html
+    assert "spriteTrackerActiveFilter" in html
+    assert "setActiveFilter" in html
+    assert "localStorage.setItem(FILTER_KEY" in html
+    assert "localStorage.getItem(FILTER_KEY)" in html
     assert "exportData" in html
 
 
@@ -56,6 +61,15 @@ def test_tracker_excludes_mastery_pod_and_groups_rows():
     assert "sprite-row" in html
     assert "Water Sprite" in html
     assert "Fire Sprite" in html
+
+
+def test_tracker_temporarily_hides_unavailable_variants():
+    html = INDEX.read_text()
+
+    assert 'const unavailableVariantPrefixes = ["Gem", "Holofoil", "Cube"]' in html
+    assert "const visibleSpriteAssets = spriteAssets.filter" in html
+    assert "unavailableVariantPrefixes.some" in html
+    assert "visibleSpriteAssets.map" in html
 
 
 def test_tracker_uses_requested_sprite_row_order():

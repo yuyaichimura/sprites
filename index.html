@@ -528,14 +528,14 @@
       <aside class="side">
         <section class="masthead" aria-labelledby="page-title">
           <h1 id="page-title">Sprite Tracker</h1>
-          <p class="subhead">Fortnite Runners, 87 sprite variants</p>
+          <p class="subhead">Fortnite Runners, 70 sprite variants</p>
           <div class="progress" aria-label="Progress">
             <div class="stat">
-              <strong id="collectedCount">0/87</strong>
+              <strong id="collectedCount">0/70</strong>
               <span>Collected</span>
             </div>
             <div class="stat">
-              <strong id="masteredCount">0/87</strong>
+              <strong id="masteredCount">0/70</strong>
               <span>Mastered</span>
             </div>
           </div>
@@ -752,7 +752,11 @@
         ["v4110-holofoil-air", "Holofoil Air Sprite", V4110_SOURCE, V4110_CROPS.air[4], V4110_SOURCE_LABEL],
       ];
 
-      const SPRITE_TOTAL = spriteAssets.length;
+      const unavailableVariantPrefixes = ["Gem", "Holofoil", "Cube"];
+      const visibleSpriteAssets = spriteAssets.filter(([, name]) => (
+        !unavailableVariantPrefixes.some((prefix) => name.startsWith(`${prefix} `))
+      ));
+      const SPRITE_TOTAL = visibleSpriteAssets.length;
       const variantPrefixes = ["Gold", "Gummy", "Galaxy", "Gem", "Holofoil", "Cube", "Quack"];
       const spriteSkills = {
         "Earth Sprite": "Rare chest boost",
@@ -785,7 +789,7 @@
         "Boss Sprite",
       ];
       const assetBase = "assets/sprites";
-      const sprites = spriteAssets.map(([tag, name, customImage, crop, source], index) => {
+      const sprites = visibleSpriteAssets.map(([tag, name, customImage, crop, source], index) => {
         const group = name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
         return {
           id: tag.toLowerCase(),
