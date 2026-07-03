@@ -133,6 +133,60 @@
         text-transform: none;
       }
 
+      .variant-reference {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .variant-ref-chip {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.25rem;
+        min-height: 1.7rem;
+        padding: 0.18rem 0.55rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 750;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .variant-ref-chip strong {
+        color: var(--ink);
+        font-size: 0.7rem;
+        font-weight: 950;
+        text-transform: uppercase;
+      }
+
+      .variant-ref-chip.gold {
+        border-color: oklch(74% 0.13 83);
+        background: oklch(91% 0.105 91);
+      }
+
+      .variant-ref-chip.gummy {
+        border-color: oklch(76% 0.14 345);
+        background: oklch(93% 0.065 348);
+      }
+
+      .variant-ref-chip.galaxy {
+        border-color: oklch(67% 0.16 300);
+        background: oklch(91% 0.065 302);
+      }
+
+      .variant-ref-chip.gem {
+        border-color: oklch(79% 0.045 190);
+        background: oklch(94% 0.028 195);
+      }
+
+      .variant-ref-chip.holofoil {
+        border-color: oklch(76% 0.1 225);
+        background: oklch(93% 0.04 225);
+      }
+
       .toolbar {
         position: sticky;
         top: 0;
@@ -309,6 +363,38 @@
         line-height: 1;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      .row-levels {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        padding: 0 0.15rem 0.15rem;
+      }
+
+      .row-level {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.2rem;
+        max-width: 100%;
+        min-height: 1.4rem;
+        padding: 0.18rem 0.48rem;
+        overflow: hidden;
+        border: 1px solid oklch(79% 0.045 245);
+        border-radius: 999px;
+        background: oklch(95% 0.018 245);
+        color: oklch(39% 0.055 252);
+        font-size: 0.72rem;
+        font-weight: 760;
+        line-height: 1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-level strong {
+        color: oklch(27% 0.06 252);
+        font-size: 0.68rem;
+        font-weight: 950;
       }
 
       .row-cards {
@@ -602,6 +688,13 @@
 
       <main class="main">
         <nav class="toolbar" aria-label="Tracker controls">
+          <div class="variant-reference" aria-label="Variant effects">
+            <span class="variant-ref-chip gold"><strong>Gold</strong> 3x elim XP</span>
+            <span class="variant-ref-chip gummy"><strong>Gummy</strong> +20% Sprite Dust</span>
+            <span class="variant-ref-chip galaxy"><strong>Galaxy</strong> +30% ammo</span>
+            <span class="variant-ref-chip gem"><strong>Gem</strong> -30% fall damage</span>
+            <span class="variant-ref-chip holofoil"><strong>Holofoil</strong> +rare variant chest chance</span>
+          </div>
           <div class="topline">
             <div class="toolbar-left">
               <div class="panel-control">
@@ -756,6 +849,25 @@
         "Striker Sprite": "Overdrive on mantle",
         "Aura Sprite": "Shock Rock charge",
       };
+      const spriteLevelEffects = {
+        "Water Sprite": ["2 Shield/tick", "3 Shield/tick", "4 Shield/tick", "5 Shield/tick", "6 Shield/tick"],
+        "Earth Sprite": ["10% rare loot", "12.5% rare loot", "15% rare loot", "17.5% rare loot", "20% rare loot"],
+        "Fire Sprite": ["150 dmg trigger", "125 dmg trigger", "100 dmg trigger", "75 dmg trigger", "50 dmg trigger"],
+        "Duck Sprite": ["2 Shield/tick", "3 Shield/tick", "4 Shield/tick", "6 Shield/tick", "8 Shield/tick"],
+        "Ghost Sprite": ["3s cloak", "3.5s cloak", "4s cloak", "4.5s cloak", "5s cloak"],
+        "Dream Sprite": ["Loot I", "Loot II", "Loot III", "Loot IV", "Max legendary loot"],
+        "Demon Sprite": ["10 heal/elim", "15 heal/elim", "20 heal/elim", "25 heal/elim", "30 heal/elim"],
+        "King Sprite": ["+30 pickaxe dmg", "+40 pickaxe dmg", "+60 pickaxe dmg", "+80 pickaxe dmg", "+120 pickaxe dmg"],
+        "Burnt Peanut": ["20% more loot", "30% more loot", "40% more loot", "50% more loot", "60% loot + mythic chance"],
+        "Zero Point Sprite": ["6s bubble", "7s bubble", "8s bubble", "9s bubble", "10s bubble"],
+        "Fishy Sprite": ["25% swim / 10% move", "50% swim / 20% move", "100% swim / 30% move", "150% swim / 40% move", "200% swim / 50% move"],
+        "Striker Sprite": ["6s Overdrive", "7s Overdrive", "8s Overdrive", "9s Overdrive", "10s Overdrive"],
+        "Aura Sprite": ["175 dmg trigger", "150 dmg trigger", "125 dmg trigger", "100 dmg trigger", "75 dmg trigger"],
+        "Boss Sprite": ["+5 HP/Shield", "+10 HP/Shield", "+15 HP/Shield", "+20 HP/Shield", "+25 HP/Shield"],
+        "Grim Sprite": ["3s mark", "3.5s mark", "4s mark", "4.5s mark", "5s mark"],
+        "Air Sprite": ["Speed + jump I", "Speed + jump II", "Speed + jump III", "Speed + jump IV", "Speed + jump V"],
+        "Seven Sprite": ["10s trails", "15s trails", "20s trails", "25s trails", "30s trails"],
+      };
       const groupOrder = [
         "Water Sprite",
         "Earth Sprite",
@@ -895,6 +1007,10 @@
       function renderGroup(group, groupSprites) {
         const row = document.createElement("section");
         const groupSkill = spriteSkills[group] || "";
+        const levelEffects = spriteLevelEffects[group] || [];
+        const levelMarkup = levelEffects.map((effect, index) => (
+          `<span class="row-level" title="Level ${index + 1}: ${effect}"><strong>L${index + 1}</strong>${effect}</span>`
+        )).join("");
         row.className = "sprite-row";
         row.dataset.group = group.toLowerCase();
         row.innerHTML = `
@@ -905,6 +1021,7 @@
             </div>
             <span class="row-count">${groupSprites.length} variants</span>
           </div>
+          ${levelMarkup ? `<div class="row-levels" aria-label="${group} level effects">${levelMarkup}</div>` : ""}
           <div class="row-cards"></div>
         `;
         const cards = row.querySelector(".row-cards");

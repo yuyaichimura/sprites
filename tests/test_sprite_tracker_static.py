@@ -219,3 +219,16 @@ def test_sprite_cards_show_verified_player_skills_only():
     assert "Aqua pulse" not in html
     assert "Gold sheen" not in html
     assert "variantEffects" not in html
+
+
+def test_sprite_rows_show_level_effects():
+    html = INDEX.read_text()
+
+    assert "spriteLevelEffects" in html
+    assert "row-levels" in html
+    assert "row-level" in html
+    assert "2 Shield/tick" in html
+    assert "150 dmg trigger" in html
+    assert "10% rare loot" in html
+    assert "6s Overdrive" in html
+    assert "+25 HP/Shield" in html
