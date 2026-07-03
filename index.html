@@ -768,6 +768,22 @@
         "TheBurntPeanut Sprite": "Extra elim loot",
         "Soccer Striker Sprite": "Overdrive on move",
       };
+      const groupOrder = [
+        "Water Sprite",
+        "Earth Sprite",
+        "Fire Sprite",
+        "Duck Sprite",
+        "Ghost Sprite",
+        "Dream Sprite",
+        "Demon Sprite",
+        "Punk Sprite",
+        "King Sprite",
+        "TheBurntPeanut Sprite",
+        "Fishy Sprite",
+        "Soccer Striker Sprite",
+        "Aura Sprite",
+        "Boss Sprite",
+      ];
       const assetBase = "assets/sprites";
       const sprites = spriteAssets.map(([tag, name, customImage, crop, source], index) => {
         const group = name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
@@ -783,7 +799,11 @@
           number: index + 1,
         };
       });
-      const groups = [...new Set(sprites.map((sprite) => sprite.group))];
+      const discoveredGroups = [...new Set(sprites.map((sprite) => sprite.group))];
+      const groups = [
+        ...groupOrder.filter((group) => discoveredGroups.includes(group)),
+        ...discoveredGroups.filter((group) => !groupOrder.includes(group)),
+      ];
 
       let state = loadState();
 

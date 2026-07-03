@@ -58,6 +58,31 @@ def test_tracker_excludes_mastery_pod_and_groups_rows():
     assert "Fire Sprite" in html
 
 
+def test_tracker_uses_requested_sprite_row_order():
+    html = INDEX.read_text()
+
+    assert "const groupOrder" in html
+    group_order_block = html.split("const groupOrder = [", 1)[1].split("];", 1)[0]
+    expected_order = [
+        '"Water Sprite",',
+        '"Earth Sprite",',
+        '"Fire Sprite",',
+        '"Duck Sprite",',
+        '"Ghost Sprite",',
+        '"Dream Sprite",',
+        '"Demon Sprite",',
+        '"Punk Sprite",',
+        '"King Sprite",',
+        '"TheBurntPeanut Sprite",',
+        '"Fishy Sprite",',
+        '"Soccer Striker Sprite",',
+        '"Aura Sprite",',
+        '"Boss Sprite",',
+    ]
+    positions = [group_order_block.index(item) for item in expected_order]
+    assert positions == sorted(positions)
+
+
 def test_tracker_downloads_sprite_assets_locally():
     assert (SPRITE_ASSETS / "mat1.png").exists()
     assert (SPRITE_ASSETS / "mat55.png").exists()
