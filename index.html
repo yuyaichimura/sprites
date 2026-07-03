@@ -492,53 +492,65 @@
         display: inline-flex;
         align-items: center;
         max-width: 100%;
-        min-height: 1.15rem;
-        padding: 0.12rem 0.44rem;
+        min-height: 1.35rem;
+        padding: 0.16rem 0.55rem;
         overflow: hidden;
-        border: 1px solid var(--line);
+        border: 2px solid transparent;
         border-radius: 999px;
-        font-size: 0.66rem;
-        font-weight: 900;
+        font-size: 0.68rem;
+        font-weight: 950;
         line-height: 1;
         text-overflow: ellipsis;
         text-transform: uppercase;
         white-space: nowrap;
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.28), 0 1px 4px oklch(28% 0.04 55 / 0.12);
+      }
+
+      .variant-chip::before {
+        content: "";
+        display: inline-block;
+        width: 0.42rem;
+        height: 0.42rem;
+        margin-right: 0.28rem;
+        border-radius: 999px;
+        background: currentColor;
+        box-shadow: 0 0 0 2px oklch(100% 0 0 / 0.42);
       }
 
       .variant-chip.base {
-        border-color: oklch(79% 0.025 250);
-        background: oklch(94% 0.012 250);
-        color: oklch(38% 0.04 255);
+        border-color: oklch(48% 0.035 250);
+        background: oklch(56% 0.055 252);
+        color: oklch(98% 0.01 250);
       }
 
       .variant-chip.gold {
-        border-color: oklch(74% 0.13 83);
-        background: oklch(88% 0.15 91);
-        color: oklch(35% 0.08 78);
+        border-color: oklch(55% 0.15 76);
+        background: oklch(76% 0.2 86);
+        color: oklch(22% 0.075 72);
       }
 
       .variant-chip.gummy {
-        border-color: oklch(76% 0.14 345);
-        background: oklch(90% 0.09 348);
-        color: oklch(39% 0.1 350);
+        border-color: oklch(54% 0.24 354);
+        background: oklch(68% 0.25 354);
+        color: oklch(99% 0.01 350);
       }
 
       .variant-chip.galaxy {
-        border-color: oklch(67% 0.16 300);
-        background: oklch(87% 0.09 302);
-        color: oklch(34% 0.1 292);
+        border-color: oklch(40% 0.2 296);
+        background: oklch(50% 0.25 299);
+        color: oklch(99% 0.012 300);
       }
 
       .variant-chip.gem {
-        border-color: oklch(79% 0.045 190);
-        background: oklch(93% 0.035 195);
-        color: oklch(34% 0.055 200);
+        border-color: oklch(52% 0.12 194);
+        background: oklch(72% 0.13 194);
+        color: oklch(18% 0.07 205);
       }
 
       .variant-chip.holofoil {
-        border-color: oklch(76% 0.1 225);
-        background: oklch(91% 0.055 225);
-        color: oklch(34% 0.075 235);
+        border-color: oklch(48% 0.17 226);
+        background: oklch(64% 0.17 226);
+        color: oklch(99% 0.01 230);
       }
 
       .availability {
@@ -889,8 +901,10 @@
       ];
       const sprites = spriteAssets.map((sprite, index) => {
         const group = sprite.name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
+        const variantClass = sprite.variant.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         return {
           ...sprite,
+          variantClass,
           group,
           tag: sprite.id,
           previousId: sprite.id.startsWith("mat") ? String(Number(sprite.id.replace("mat", "")) + 1) : "",

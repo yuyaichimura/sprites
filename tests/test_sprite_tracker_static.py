@@ -232,3 +232,12 @@ def test_sprite_rows_show_level_effects():
     assert "10% rare loot" in html
     assert "6s Overdrive" in html
     assert "+25 HP/Shield" in html
+
+def test_variant_chips_get_variant_classes():
+    html = INDEX.read_text()
+
+    assert "const variantClass = sprite.variant.toLowerCase()" in html
+    assert "variantClass," in html
+    assert 'class="variant-chip ${sprite.variantClass}"' in html
+    assert 'variant-chip undefined' not in html
+
