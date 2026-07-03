@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sprite Tracker</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: oklch(96% 0.018 78);
+        --panel: oklch(99% 0.012 86);
+        --panel-2: oklch(93% 0.02 92);
+        --ink: oklch(22% 0.035 268);
+        --muted: oklch(48% 0.028 263);
+        --line: oklch(78% 0.035 78);
+        --collected: oklch(67% 0.17 155);
+        --mastered: oklch(62% 0.18 302);
+        --accent: oklch(64% 0.19 35);
+        --focus: oklch(62% 0.18 225);
+        --shadow: 0 18px 46px oklch(28% 0.04 55 / 0.16);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 12% 16%, oklch(88% 0.13 197 / 0.58), transparent 27rem),
+          radial-gradient(circle at 92% 5%, oklch(83% 0.15 38 / 0.45), transparent 24rem),
+          linear-gradient(145deg, oklch(98% 0.02 89), var(--paper) 48%, oklch(93% 0.035 103));
+        color: var(--ink);
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr);
+        gap: 0.8rem;
+        min-height: 100vh;
+        padding: 0.8rem;
+        transition: grid-template-columns 180ms ease-out;
+      }
+
+      body.side-collapsed .shell {
+        grid-template-columns: 0 minmax(0, 1fr);
+      }
+
+      .side,
+      .main {
+        min-width: 0;
+      }
+
+      .side {
+        position: sticky;
+        top: 1rem;
+        align-self: start;
+        display: grid;
+        gap: 0.75rem;
+        max-height: calc(100vh - 2rem);
+        overflow: auto;
+        transition: opacity 150ms ease-out, visibility 150ms ease-out;
+      }
+
+      body.side-collapsed .side {
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+      }
+
+      .masthead {
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.85rem;
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .subhead {
+        margin: 0.45rem 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.35;
+      }
+
+      .progress {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+        margin-top: 1rem;
+      }
+
+      .stat {
+        padding: 0.75rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-2);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.55rem;
+        line-height: 1;
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .reference {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .reference img {
+        display: block;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: grid;
+        gap: 0.75rem;
+        padding: 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: oklch(99% 0.012 86 / 0.94);
+        box-shadow: 0 12px 30px oklch(28% 0.04 55 / 0.12);
+      }
+
+      .topline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+      }
+
+      .toolbar-left {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .filters,
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .chip,
+      .tool {
+        min-height: 2.35rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 750;
+        transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
+      }
+
+      .panel-control {
+        display: flex;
+        align-items: center;
+        padding-right: 0.75rem;
+        border-right: 1px solid var(--line);
+      }
+
+      .panel-toggle {
+        min-height: 2.35rem;
+        padding: 0 0.85rem;
+        border: 1px solid oklch(58% 0.11 224);
+        border-radius: 7px;
+        background: oklch(92% 0.055 222);
+        color: oklch(27% 0.06 242);
+        font-weight: 850;
+        transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
+      }
+
+      .chip {
+        padding: 0 0.8rem;
+      }
+
+      .tool {
+        padding: 0 0.7rem;
+      }
+
+      .chip:hover,
+      .panel-toggle:hover,
+      .tool:hover {
+        transform: translateY(-1px);
+        border-color: oklch(64% 0.13 78);
+      }
+
+      .chip.active {
+        border-color: var(--accent);
+        background: oklch(91% 0.085 50);
+      }
+
+      .search {
+        width: min(100%, 24rem);
+        min-height: 2.45rem;
+        padding: 0 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--panel);
+        color: var(--ink);
+      }
+
+      .search:focus,
+      .chip:focus-visible,
+      .panel-toggle:focus-visible,
+      .tool:focus-visible,
+      .toggle:focus-visible,
+      .sprite-card:focus-visible {
+        outline: 3px solid oklch(62% 0.18 225 / 0.34);
+        outline-offset: 2px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 0.9rem;
+        padding-top: 0.85rem;
+      }
+
+      .sprite-row {
+        display: grid;
+        gap: 0.55rem;
+      }
+
+      .sprite-row.hidden {
+        display: none;
+      }
+
+      .row-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0 0.15rem;
+      }
+
+      .row-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+      }
+
+      .row-title h2 {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.2;
+        letter-spacing: 0;
+      }
+
+      .row-count {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 750;
+      }
+
+      .row-skill {
+        max-width: 18rem;
+        padding: 0.18rem 0.5rem;
+        overflow: hidden;
+        border: 1px solid oklch(76% 0.075 168);
+        border-radius: 999px;
+        background: oklch(94% 0.04 168);
+        color: oklch(31% 0.07 172);
+        font-size: 0.72rem;
+        font-weight: 850;
+        line-height: 1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9.25rem, 1fr));
+        gap: 0.55rem;
+      }
+
+      .sprite-card {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        grid-template-rows: 4.8rem auto auto;
+        gap: 0.38rem;
+        min-height: 9.4rem;
+        overflow: hidden;
+        padding: 0.55rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 8px 18px oklch(28% 0.04 55 / 0.08);
+        transition: transform 170ms ease-out, box-shadow 170ms ease-out, border-color 170ms ease-out;
+      }
+
+      .sprite-card:hover {
+        transform: translateY(-2px);
+        border-color: oklch(66% 0.12 78);
+        box-shadow: 0 13px 24px oklch(28% 0.04 55 / 0.13);
+      }
+
+      .sprite-card.hidden {
+        display: none;
+      }
+
+      .sprite-stage {
+        position: relative;
+        z-index: 0;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        overflow: hidden;
+        min-height: 0;
+        border-radius: 7px;
+        background:
+          linear-gradient(145deg, oklch(98% 0.01 90), oklch(91% 0.03 100)),
+          radial-gradient(circle at 50% 100%, oklch(73% 0.14 150 / 0.35), transparent 42%);
+      }
+
+      .sprite-image {
+        display: block;
+        width: min(4.7rem, 90%);
+        height: min(4.5rem, 90%);
+        object-fit: contain;
+        pointer-events: none;
+        filter: drop-shadow(0 0.35rem 0.45rem oklch(28% 0.04 55 / 0.22));
+      }
+
+      .sprite-crop {
+        display: block;
+        width: min(4.6rem, 88%);
+        height: min(4.4rem, 88%);
+        pointer-events: none;
+        filter: drop-shadow(0 0.35rem 0.45rem oklch(28% 0.04 55 / 0.22));
+      }
+
+      .meta {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+      }
+
+      .name {
+        min-width: 0;
+        max-width: 100%;
+        font-size: 0.88rem;
+        font-weight: 800;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .number {
+        flex: 0 0 auto;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 800;
+      }
+
+      .toggles {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.45rem;
+      }
+
+      .toggle {
+        min-width: 0;
+        min-height: 1.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 0 0.35rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: oklch(96% 0.01 86);
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 850;
+        text-transform: uppercase;
+        transition: background 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out;
+      }
+
+      .toggle[data-kind="collected"].on {
+        border-color: oklch(57% 0.15 155);
+        background: oklch(88% 0.12 152);
+        color: oklch(28% 0.09 155);
+      }
+
+      .toggle[data-kind="mastered"].on {
+        border-color: oklch(55% 0.15 302);
+        background: oklch(89% 0.1 310);
+        color: oklch(33% 0.1 302);
+      }
+
+      .drawer {
+        display: grid;
+        gap: 0.45rem;
+        padding: 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .drawer textarea {
+        min-height: 5.2rem;
+        resize: vertical;
+        padding: 0.65rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: oklch(97% 0.01 86);
+        color: var(--ink);
+      }
+
+      .status {
+        min-height: 1.3rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 880px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        body.side-collapsed .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .side {
+          position: static;
+          max-height: none;
+        }
+
+        body.side-collapsed .side {
+          display: none;
+        }
+
+        .reference img {
+          max-height: 20rem;
+          object-fit: contain;
+        }
+
+        .toolbar {
+          top: 0.5rem;
+        }
+
+        .panel-control {
+          padding-right: 0;
+          border-right: 0;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .shell {
+          padding: 0.65rem;
+        }
+
+        .row-cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.55rem;
+        }
+
+        .sprite-card {
+          grid-template-rows: 5.2rem auto auto;
+          min-height: 10.4rem;
+          padding: 0.55rem;
+        }
+
+        .sprite-image {
+          width: min(5rem, 92%);
+        }
+
+        .topline {
+          align-items: stretch;
+        }
+
+        .search {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="side">
+        <section class="masthead" aria-labelledby="page-title">
+          <h1 id="page-title">Sprite Tracker</h1>
+          <p class="subhead">Fortnite Runners, 87 sprite variants</p>
+          <div class="progress" aria-label="Progress">
+            <div class="stat">
+              <strong id="collectedCount">0/87</strong>
+              <span>Collected</span>
+            </div>
+            <div class="stat">
+              <strong id="masteredCount">0/87</strong>
+              <span>Mastered</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="reference" aria-label="Reference sheet">
+          <img
+            alt="Original Fortnite Runners sprite tracker reference"
+            src="assets/reference/sprite-tracker-reference.jpeg"
+          >
+        </section>
+
+        <section class="drawer" aria-label="Data">
+          <div class="actions">
+            <button class="tool" id="exportData" type="button">Export</button>
+            <button class="tool" id="importData" type="button">Import</button>
+            <button class="tool" id="resetData" type="button">Reset</button>
+          </div>
+          <textarea id="dataBox" spellcheck="false" aria-label="Tracker data"></textarea>
+          <div class="status" id="status" role="status"></div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <nav class="toolbar" aria-label="Tracker controls">
+          <div class="topline">
+            <div class="toolbar-left">
+              <div class="panel-control">
+                <button id="toggleSidebar" type="button" class="panel-toggle" aria-pressed="false">Hide panel</button>
+              </div>
+              <div class="filters" aria-label="Filters">
+                <button class="chip active" type="button" data-filter="all">All</button>
+                <button class="chip" type="button" data-filter="missing">Missing</button>
+                <button class="chip" type="button" data-filter="collected">Collected</button>
+                <button class="chip" type="button" data-filter="mastered">Mastered</button>
+                <button class="chip" type="button" data-filter="hide-mastered">Hide mastered</button>
+              </div>
+            </div>
+            <input class="search" id="search" type="search" placeholder="Search" aria-label="Search sprites">
+          </div>
+        </nav>
+        <section class="grid" id="spriteGrid" aria-label="Sprites"></section>
+      </main>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "spriteTrackerState";
+      const SIDEBAR_KEY = "spriteTrackerSidebarCollapsed";
+      const SERVER_STATE_URL = location.protocol === "file:"
+        ? "http://127.0.0.1:8765/api/state"
+        : "/api/state";
+      const spriteGrid = document.querySelector("#spriteGrid");
+      const collectedCount = document.querySelector("#collectedCount");
+      const masteredCount = document.querySelector("#masteredCount");
+      const dataBox = document.querySelector("#dataBox");
+      const status = document.querySelector("#status");
+      const search = document.querySelector("#search");
+      const toggleSidebar = document.querySelector("#toggleSidebar");
+      let activeFilter = "all";
+      let serverStateAvailable = false;
+
+      const V4110_SOURCE = "assets/reference/fnassist-v4110-sprites.jpg";
+      const V4110_SOURCE_LABEL = "FNAssist v41.10";
+      const V4110_CELL_SIZE = 512;
+      const V4110_CROP_INSET = 72;
+      const V4110_COLUMN_X = [0, 512, 1024, 1536, 2048, 2560, 3072];
+      const V4110_ROW_Y = [0, 512, 1024, 1536, 2048];
+
+      function makeV4110Crop(column, row) {
+        return [
+          V4110_COLUMN_X[column] + V4110_CROP_INSET,
+          V4110_ROW_Y[row] + V4110_CROP_INSET,
+          V4110_CELL_SIZE - V4110_CROP_INSET * 2,
+          V4110_CELL_SIZE - V4110_CROP_INSET * 2,
+        ];
+      }
+
+      const V4110_CROPS = {
+        grimReaper: [
+          makeV4110Crop(0, 0),
+          makeV4110Crop(0, 1),
+          makeV4110Crop(0, 2),
+          makeV4110Crop(0, 3),
+        ],
+        soccerStriker: [
+          makeV4110Crop(1, 0),
+          makeV4110Crop(1, 1),
+          makeV4110Crop(1, 2),
+          makeV4110Crop(1, 3),
+          makeV4110Crop(0, 4),
+        ],
+        seven: [
+          makeV4110Crop(2, 0),
+          makeV4110Crop(2, 1),
+          makeV4110Crop(2, 2),
+          makeV4110Crop(2, 3),
+          makeV4110Crop(1, 4),
+        ],
+        fishy: [
+          makeV4110Crop(3, 0),
+          makeV4110Crop(3, 1),
+          makeV4110Crop(3, 2),
+          makeV4110Crop(3, 3),
+        ],
+        aura: [
+          makeV4110Crop(4, 0),
+          makeV4110Crop(4, 1),
+          makeV4110Crop(4, 2),
+          makeV4110Crop(4, 3),
+          makeV4110Crop(2, 4),
+        ],
+        air: [
+          makeV4110Crop(5, 0),
+          makeV4110Crop(5, 1),
+          makeV4110Crop(5, 2),
+          makeV4110Crop(5, 3),
+          makeV4110Crop(3, 4),
+        ],
+        boss: [
+          makeV4110Crop(6, 0),
+          makeV4110Crop(6, 1),
+          makeV4110Crop(6, 2),
+          makeV4110Crop(6, 3),
+        ],
+      };
+
+      const spriteAssets = [
+        ["Mat1", "Water Sprite"],
+        ["Mat2", "Gold Water Sprite"],
+        ["Mat3", "Gummy Water Sprite"],
+        ["Mat4", "Galaxy Water Sprite"],
+        ["Mat5", "Gem Water Sprite"],
+        ["Mat6", "Holofoil Water Sprite"],
+        ["Mat7", "Earth Sprite"],
+        ["Mat8", "Gold Earth Sprite"],
+        ["Mat9", "Gummy Earth Sprite"],
+        ["Mat10", "Galaxy Earth Sprite"],
+        ["Mat11", "Gem Earth Sprite"],
+        ["Mat12", "Cube Earth Sprite"],
+        ["Mat13", "Fire Sprite"],
+        ["Mat14", "Gold Fire Sprite"],
+        ["Mat15", "Gummy Fire Sprite"],
+        ["Mat16", "Galaxy Fire Sprite"],
+        ["Mat17", "Holofoil Fire Sprite"],
+        ["Mat18", "Cube Fire Sprite"],
+        ["Mat19", "Duck Sprite"],
+        ["Mat20", "Gold Duck Sprite"],
+        ["Mat21", "Gummy Duck Sprite"],
+        ["Mat22", "Galaxy Duck Sprite"],
+        ["Mat23", "Gem Duck Sprite"],
+        ["Mat24", "Ghost Sprite"],
+        ["Mat25", "Gold Ghost Sprite"],
+        ["Mat26", "Gummy Ghost Sprite"],
+        ["Mat27", "Galaxy Ghost Sprite"],
+        ["Mat28", "Holofoil Ghost Sprite"],
+        ["Mat29", "Demon Sprite"],
+        ["Mat30", "Gold Demon Sprite"],
+        ["Mat31", "Gummy Demon Sprite"],
+        ["Mat32", "Galaxy Demon Sprite"],
+        ["Mat33", "Gem Demon Sprite"],
+        ["Mat34", "King Sprite"],
+        ["Mat35", "Gold King Sprite"],
+        ["Mat36", "Gummy King Sprite"],
+        ["Mat37", "Galaxy King Sprite"],
+        ["Mat38", "Holofoil King Sprite"],
+        ["Mat39", "Dream Sprite"],
+        ["Mat40", "Gold Dream Sprite"],
+        ["Mat41", "Gummy Dream Sprite"],
+        ["Mat42", "Galaxy Dream Sprite"],
+        ["Mat43", "Cube Dream Sprite"],
+        ["Mat44", "Punk Sprite"],
+        ["Mat45", "Gold Punk Sprite"],
+        ["Mat46", "Gummy Punk Sprite"],
+        ["Mat47", "Galaxy Punk Sprite"],
+        ["Mat48", "Cube Punk Sprite"],
+        ["Mat49", "TheBurntPeanut Sprite"],
+        ["Mat50", "Zero Point Sprite"],
+        ["Mat51", "Gold Zero Point Sprite"],
+        ["Mat52", "Gummy Zero Point Sprite"],
+        ["Mat53", "Galaxy Zero Point Sprite"],
+        ["Mat54", "Gem Zero Point Sprite"],
+        ["Mat55", "Quack Zero Point Sprite"],
+        ["v4110-grim-reaper", "Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[0], V4110_SOURCE_LABEL],
+        ["v4110-soccer-striker", "Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[0], V4110_SOURCE_LABEL],
+        ["v4110-seven", "Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[0], V4110_SOURCE_LABEL],
+        ["v4110-fishy", "Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[0], V4110_SOURCE_LABEL],
+        ["v4110-aura", "Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[0], V4110_SOURCE_LABEL],
+        ["v4110-air", "Air Sprite", V4110_SOURCE, V4110_CROPS.air[0], V4110_SOURCE_LABEL],
+        ["v4110-boss", "Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[0], V4110_SOURCE_LABEL],
+        ["v4110-gold-grim-reaper", "Gold Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[1], V4110_SOURCE_LABEL],
+        ["v4110-gold-soccer-striker", "Gold Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[1], V4110_SOURCE_LABEL],
+        ["v4110-gold-seven", "Gold Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[1], V4110_SOURCE_LABEL],
+        ["v4110-gold-fishy", "Gold Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[1], V4110_SOURCE_LABEL],
+        ["v4110-gold-aura", "Gold Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[1], V4110_SOURCE_LABEL],
+        ["v4110-gold-air", "Gold Air Sprite", V4110_SOURCE, V4110_CROPS.air[1], V4110_SOURCE_LABEL],
+        ["v4110-gold-boss", "Gold Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[1], V4110_SOURCE_LABEL],
+        ["v4110-gummy-grim-reaper", "Gummy Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[2], V4110_SOURCE_LABEL],
+        ["v4110-gummy-soccer-striker", "Gummy Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[2], V4110_SOURCE_LABEL],
+        ["v4110-gummy-seven", "Gummy Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[2], V4110_SOURCE_LABEL],
+        ["v4110-gummy-fishy", "Gummy Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[2], V4110_SOURCE_LABEL],
+        ["v4110-gummy-aura", "Gummy Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[2], V4110_SOURCE_LABEL],
+        ["v4110-gummy-air", "Gummy Air Sprite", V4110_SOURCE, V4110_CROPS.air[2], V4110_SOURCE_LABEL],
+        ["v4110-gummy-boss", "Gummy Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[2], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-grim-reaper", "Galaxy Grim Reaper Sprite", V4110_SOURCE, V4110_CROPS.grimReaper[3], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-soccer-striker", "Galaxy Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[3], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-seven", "Galaxy Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[3], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-fishy", "Galaxy Fishy Sprite", V4110_SOURCE, V4110_CROPS.fishy[3], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-aura", "Galaxy Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[3], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-air", "Galaxy Air Sprite", V4110_SOURCE, V4110_CROPS.air[3], V4110_SOURCE_LABEL],
+        ["v4110-galaxy-boss", "Galaxy Boss Sprite", V4110_SOURCE, V4110_CROPS.boss[3], V4110_SOURCE_LABEL],
+        ["v4110-holofoil-soccer-striker", "Holofoil Soccer Striker Sprite", V4110_SOURCE, V4110_CROPS.soccerStriker[4], V4110_SOURCE_LABEL],
+        ["v4110-holofoil-seven", "Holofoil Seven Sprite", V4110_SOURCE, V4110_CROPS.seven[4], V4110_SOURCE_LABEL],
+        ["v4110-holofoil-aura", "Holofoil Aura Sprite", V4110_SOURCE, V4110_CROPS.aura[4], V4110_SOURCE_LABEL],
+        ["v4110-holofoil-air", "Holofoil Air Sprite", V4110_SOURCE, V4110_CROPS.air[4], V4110_SOURCE_LABEL],
+      ];
+
+      const SPRITE_TOTAL = spriteAssets.length;
+      const variantPrefixes = ["Gold", "Gummy", "Galaxy", "Gem", "Holofoil", "Cube", "Quack"];
+      const spriteSkills = {
+        "Earth Sprite": "Rare chest boost",
+        "Fire Sprite": "Fire burst on damage",
+        "Water Sprite": "Water shield regen",
+        "Duck Sprite": "Emote shield regen",
+        "Demon Sprite": "Heal on elim",
+        "Ghost Sprite": "Reload invisibility",
+        "King Sprite": "Pickaxe damage up",
+        "Punk Sprite": "Random chest bonus",
+        "Dream Sprite": "Loot each level",
+        "Zero Point Sprite": "Heal bubble",
+        "TheBurntPeanut Sprite": "Extra elim loot",
+        "Soccer Striker Sprite": "Overdrive on move",
+      };
+      const assetBase = "assets/sprites";
+      const sprites = spriteAssets.map(([tag, name, customImage, crop, source], index) => {
+        const group = name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
+        return {
+          id: tag.toLowerCase(),
+          previousId: tag.startsWith("Mat") ? String(Number(tag.replace("Mat", "")) + 1) : "",
+          tag,
+          name,
+          group,
+          image: customImage || `${assetBase}/${tag.toLowerCase()}.png`,
+          crop,
+          source: source || "Fortnite-API",
+          number: index + 1,
+        };
+      });
+      const groups = [...new Set(sprites.map((sprite) => sprite.group))];
+
+      let state = loadState();
+
+      function emptyState() {
+        return sprites.reduce((next, sprite) => {
+          next[sprite.id] = { collected: false, mastered: false };
+          return next;
+        }, {});
+      }
+
+      function normalizeState(raw) {
+        const source = raw && typeof raw === "object" ? raw : {};
+        return sprites.reduce((next, sprite) => {
+          const existing = source[sprite.id] || source[sprite.previousId] || {};
+          const mastered = Boolean(existing.mastered);
+          next[sprite.id] = {
+            collected: Boolean(existing.collected) || mastered,
+            mastered,
+          };
+          return next;
+        }, {});
+      }
+
+      function loadState() {
+        try {
+          return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"));
+        } catch {
+          return emptyState();
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        persistServerState();
+      }
+
+      function hasProgress(candidate) {
+        return Object.values(candidate).some((item) => item.collected || item.mastered);
+      }
+
+      function mergeState(localState, serverState) {
+        return sprites.reduce((next, sprite) => {
+          const localItem = localState[sprite.id] || {};
+          const serverItem = serverState[sprite.id] || {};
+          const mastered = Boolean(localItem.mastered || serverItem.mastered);
+          next[sprite.id] = {
+            collected: Boolean(localItem.collected || serverItem.collected || mastered),
+            mastered,
+          };
+          return next;
+        }, {});
+      }
+
+      async function hydrateServerState() {
+        try {
+          const response = await fetch(SERVER_STATE_URL);
+          if (!response.ok) throw new Error("State server unavailable");
+          serverStateAvailable = true;
+          const serverState = normalizeState(await response.json());
+          if (hasProgress(serverState)) {
+            state = mergeState(state, serverState);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            syncAll();
+            if (hasProgress(state)) await persistServerState();
+          } else if (hasProgress(state)) {
+            await persistServerState();
+          }
+          status.textContent = "Saved to sprite-state.json.";
+        } catch {
+          serverStateAvailable = false;
+          status.textContent = "Browser storage only. Start the server for file save.";
+        }
+      }
+
+      async function persistServerState() {
+        try {
+          const response = await fetch(SERVER_STATE_URL, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(state),
+          });
+          if (!response.ok) throw new Error("Save failed");
+          serverStateAvailable = true;
+          status.textContent = "Saved to sprite-state.json.";
+        } catch {
+          serverStateAvailable = false;
+          status.textContent = "Saved in browser. Server file save unavailable.";
+        }
+      }
+
+      function renderSprites() {
+        spriteGrid.innerHTML = "";
+        for (const group of groups) {
+          spriteGrid.append(renderGroup(group, sprites.filter((sprite) => sprite.group === group)));
+        }
+        syncAll();
+      }
+
+      function renderGroup(group, groupSprites) {
+        const row = document.createElement("section");
+        const groupSkill = spriteSkills[group] || "";
+        row.className = "sprite-row";
+        row.dataset.group = group.toLowerCase();
+        row.innerHTML = `
+          <div class="row-title">
+            <div class="row-heading">
+              <h2>${group}</h2>
+              ${groupSkill ? `<span class="row-skill" title="${groupSkill}">${groupSkill}</span>` : ""}
+            </div>
+            <span class="row-count">${groupSprites.length} variants</span>
+          </div>
+          <div class="row-cards"></div>
+        `;
+        const cards = row.querySelector(".row-cards");
+        for (const sprite of groupSprites) {
+          const card = document.createElement("article");
+          card.className = "sprite-card";
+          card.tabIndex = 0;
+          card.dataset.id = sprite.id;
+          card.dataset.name = `${sprite.name} ${sprite.group} ${sprite.tag} ${sprite.source}`.toLowerCase();
+          const cropBox = sprite.crop ? cropViewBox(sprite.crop) : null;
+          const art = cropBox
+            ? `<svg class="sprite-crop" viewBox="${cropBox}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${sprite.name}">
+                <image href="${sprite.image}" x="0" y="0" width="3584" height="2560"></image>
+              </svg>`
+            : `<img class="sprite-image" src="${sprite.image}" alt="${sprite.name}" loading="lazy">`;
+          card.innerHTML = `
+            <div class="sprite-stage">
+              ${art}
+            </div>
+            <div class="meta">
+              <span class="name">${sprite.name}</span>
+              <span class="number">#${String(sprite.number).padStart(2, "0")}</span>
+            </div>
+            <div class="toggles">
+              <button class="toggle" type="button" data-kind="collected" aria-label="Toggle collected for ${sprite.name}">Have</button>
+              <button class="toggle" type="button" data-kind="mastered" aria-label="Toggle mastered for ${sprite.name}">Master</button>
+            </div>
+          `;
+          cards.append(card);
+        }
+        return row;
+      }
+
+      function cropViewBox(crop) {
+        const [cropX, cropY, cropWidth, cropHeight] = crop;
+        return [cropX, cropY, cropWidth, cropHeight].join(" ");
+      }
+
+      function toggleSprite(id, kind) {
+        const item = state[id];
+        item[kind] = !item[kind];
+        if (kind === "mastered" && item.mastered) {
+          item.collected = true;
+        }
+        if (kind === "collected" && !item.collected) {
+          item.mastered = false;
+        }
+        saveState();
+        syncAll();
+      }
+
+      function syncAll() {
+        let collected = 0;
+        let mastered = 0;
+        for (const sprite of sprites) {
+          const item = state[sprite.id];
+          if (item.collected) collected += 1;
+          if (item.mastered) mastered += 1;
+          const card = spriteGrid.querySelector(`[data-id="${sprite.id}"]`);
+          if (!card) continue;
+          card.querySelector('[data-kind="collected"]').classList.toggle("on", item.collected);
+          card.querySelector('[data-kind="mastered"]').classList.toggle("on", item.mastered);
+          card.dataset.collected = item.collected ? "true" : "false";
+          card.dataset.mastered = item.mastered ? "true" : "false";
+        }
+        collectedCount.textContent = `${collected}/${SPRITE_TOTAL}`;
+        masteredCount.textContent = `${mastered}/${SPRITE_TOTAL}`;
+        applyFilters();
+      }
+
+      function applyFilters() {
+        const query = search.value.trim().toLowerCase();
+        for (const row of spriteGrid.querySelectorAll(".sprite-row")) {
+          let visibleCards = 0;
+          for (const card of row.querySelectorAll(".sprite-card")) {
+            const matchesQuery = !query || card.dataset.name.includes(query);
+            const item = state[card.dataset.id];
+            const matchesFilter =
+              activeFilter === "all" ||
+              (activeFilter === "missing" && !item.collected) ||
+              (activeFilter === "collected" && item.collected) ||
+              (activeFilter === "mastered" && item.mastered) ||
+              (activeFilter === "hide-mastered" && !item.mastered);
+            const visible = matchesQuery && matchesFilter;
+            card.classList.toggle("hidden", !visible);
+            if (visible) visibleCards += 1;
+          }
+          row.classList.toggle("hidden", visibleCards === 0);
+        }
+      }
+
+      spriteGrid.addEventListener("click", (event) => {
+        const button = event.target.closest(".toggle");
+        if (!button) return;
+        const card = button.closest(".sprite-card");
+        toggleSprite(card.dataset.id, button.dataset.kind);
+      });
+
+      spriteGrid.addEventListener("keydown", (event) => {
+        const card = event.target.closest(".sprite-card");
+        if (!card) return;
+        if (event.key === "c" || event.key === "C") {
+          toggleSprite(card.dataset.id, "collected");
+        }
+        if (event.key === "m" || event.key === "M") {
+          toggleSprite(card.dataset.id, "mastered");
+        }
+      });
+
+      document.querySelectorAll("[data-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeFilter = button.dataset.filter;
+          document.querySelectorAll("[data-filter]").forEach((item) => {
+            item.classList.toggle("active", item === button);
+          });
+          applyFilters();
+        });
+      });
+
+      search.addEventListener("input", applyFilters);
+
+      function setSidebarCollapsed(collapsed) {
+        document.body.classList.toggle("side-collapsed", collapsed);
+        toggleSidebar.textContent = collapsed ? "Show panel" : "Hide panel";
+        toggleSidebar.setAttribute("aria-pressed", collapsed ? "true" : "false");
+        localStorage.setItem(SIDEBAR_KEY, collapsed ? "true" : "false");
+      }
+
+      toggleSidebar.addEventListener("click", () => {
+        setSidebarCollapsed(!document.body.classList.contains("side-collapsed"));
+      });
+
+      document.querySelector("#exportData").addEventListener("click", () => {
+        dataBox.value = JSON.stringify(state);
+        status.textContent = "Exported.";
+      });
+
+      document.querySelector("#importData").addEventListener("click", () => {
+        try {
+          const imported = JSON.parse(dataBox.value);
+          state = sprites.reduce((next, sprite) => {
+            const existing = imported[sprite.id] || {};
+            next[sprite.id] = {
+              collected: Boolean(existing.collected || existing.mastered),
+              mastered: Boolean(existing.mastered),
+            };
+            return next;
+          }, {});
+          saveState();
+          syncAll();
+          status.textContent = "Imported.";
+        } catch {
+          status.textContent = "Import failed.";
+        }
+      });
+
+      document.querySelector("#resetData").addEventListener("click", () => {
+        state = emptyState();
+        saveState();
+        syncAll();
+        dataBox.value = "";
+        status.textContent = "Reset.";
+      });
+
+      setSidebarCollapsed(localStorage.getItem(SIDEBAR_KEY) === "true");
+      renderSprites();
+      hydrateServerState();
+    </script>
+  </body>
+</html>
