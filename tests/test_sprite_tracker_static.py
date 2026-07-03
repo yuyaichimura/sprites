@@ -214,6 +214,10 @@ def test_sprite_cards_show_verified_player_skills_only():
     assert "Shield regen in water" in html
     assert "Rare chest boost" in html
     assert "Overdrive on mantle" in html
+    assert "Max HP/Shield up" in html
+    assert "Mark attackers" in html
+    assert "Sprint/jump boost" in html
+    assert "Enemy foot trails" in html
     assert "${groupSkill ? `<span class=\"row-skill\" title=\"${groupSkill}\">${groupSkill}</span>` : \"\"}" in html
     assert "${sprite.skill ? `<div class=\"skill-strip\"" not in html
     assert "Aqua pulse" not in html
