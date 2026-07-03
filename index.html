@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sprite Tracker</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <style>
       :root {
         color-scheme: light;
@@ -1315,7 +1316,9 @@
         status.textContent = "Reset.";
       });
 
-      setSidebarCollapsed(localStorage.getItem(SIDEBAR_KEY) === "true");
+      const storedSidebar = localStorage.getItem(SIDEBAR_KEY);
+      const defaultSidebarCollapsed = window.matchMedia("(max-width: 880px)").matches;
+      setSidebarCollapsed(defaultSidebarCollapsed || storedSidebar === "true");
       setActiveFilter(localStorage.getItem(FILTER_KEY), false);
       setShowUnreleased(showUnreleased, false);
       renderSprites();

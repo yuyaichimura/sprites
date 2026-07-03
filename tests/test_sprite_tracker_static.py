@@ -133,6 +133,9 @@ def test_tracker_has_collapsible_sidebar_and_file_sync():
     assert "panel-control" in html
     assert "panel-toggle" in html
     assert "menu-bars" in html
+    assert "storedSidebar" in html
+    assert "defaultSidebarCollapsed" in html
+    assert 'window.matchMedia("(max-width: 880px)").matches' in html
     assert "toggleControls" in html
     assert "controls-open" in html
     assert "toolbar-menu" in html
@@ -251,3 +254,11 @@ def test_variant_chips_get_variant_classes():
     assert 'class="variant-chip ${sprite.variantClass}"' in html
     assert 'variant-chip undefined' not in html
 
+
+
+def test_tracker_has_local_favicon():
+    html = INDEX.read_text()
+
+    assert 'rel="icon"' in html
+    assert 'assets/favicon.svg' in html
+    assert (ROOT / "assets" / "favicon.svg").exists()
