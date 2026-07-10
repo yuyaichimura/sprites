@@ -140,6 +140,12 @@
         text-transform: none;
       }
 
+      .compact-toggle[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: oklch(91% 0.085 50);
+        color: oklch(30% 0.07 45);
+      }
+
       .variant-reference {
         display: flex;
         flex-wrap: wrap;
@@ -444,6 +450,43 @@
         transition: transform 170ms ease-out, box-shadow 170ms ease-out, border-color 170ms ease-out;
       }
 
+      body.compact-mode .row-cards {
+        grid-template-columns: repeat(auto-fill, minmax(7.75rem, 1fr));
+        gap: 0.42rem;
+      }
+
+      body.compact-mode .sprite-card {
+        grid-template-rows: 3.9rem minmax(2.2rem, auto) auto;
+        gap: 0.28rem;
+        min-height: 8rem;
+        padding: 0.42rem;
+      }
+
+      body.compact-mode .sprite-image {
+        width: min(3.9rem, 90%);
+        height: min(3.7rem, 90%);
+      }
+
+      body.compact-mode .name {
+        font-size: 0.8rem;
+      }
+
+      body.compact-mode .number {
+        font-size: 0.68rem;
+      }
+
+      body.compact-mode .variant-chip,
+      body.compact-mode .availability {
+        min-height: 1.2rem;
+        padding: 0.12rem 0.4rem;
+        font-size: 0.61rem;
+      }
+
+      body.compact-mode .toggle {
+        min-height: 1.8rem;
+        font-size: 0.66rem;
+      }
+
       .sprite-card:hover {
         transform: translateY(-2px);
         border-color: oklch(66% 0.12 78);
@@ -576,6 +619,18 @@
         border-color: oklch(48% 0.17 226);
         background: oklch(64% 0.17 226);
         color: oklch(99% 0.01 230);
+      }
+
+      .variant-chip.cube {
+        border-color: oklch(43% 0.19 300);
+        background: oklch(57% 0.22 300);
+        color: oklch(98% 0.015 300);
+      }
+
+      .variant-chip.quack {
+        border-color: oklch(60% 0.16 82);
+        background: oklch(84% 0.18 92);
+        color: oklch(27% 0.07 74);
       }
 
       .availability {
@@ -723,6 +778,26 @@
           width: min(5rem, 92%);
         }
 
+        body.compact-mode .row-cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.42rem;
+        }
+
+        body.compact-mode .sprite-card {
+          grid-template-rows: 4.15rem auto auto;
+          min-height: 9.2rem;
+          padding: 0.42rem;
+        }
+
+        body.compact-mode .sprite-image {
+          width: min(4rem, 90%);
+          height: min(3.9rem, 90%);
+        }
+
+        body.compact-mode .toggle {
+          min-height: 2.75rem;
+        }
+
         .topline {
           align-items: center;
         }
@@ -773,7 +848,7 @@
       <aside class="side">
         <section class="masthead" aria-labelledby="page-title">
           <h1 id="page-title">Sprite Tracker</h1>
-          <p class="subhead">Fortnite Runners, <span id="spriteTotalLabel">76</span> sprite variants</p>
+          <p class="subhead">Fortnite Runners, <span id="spriteTotalLabel">66</span> sprite variants</p>
         </section>
 
         <section class="drawer" aria-label="Data">
@@ -800,9 +875,10 @@
                 </button>
               </div>
               <div class="toolbar-progress" aria-label="Progress">
-                <span class="progress-pill"><strong id="collectedCount">0/61</strong> Collected</span>
-                <span class="progress-pill"><strong id="masteredCount">0/61</strong> Mastered</span>
+                <span class="progress-pill"><strong id="collectedCount">0/66</strong> Collected</span>
+                <span class="progress-pill"><strong id="masteredCount">0/66</strong> Mastered</span>
               </div>
+              <button id="toggleCompact" class="tool compact-toggle" type="button" aria-pressed="false" aria-label="Use compact tiles">Compact</button>
             </div>
           </div>
           <div class="toolbar-menu" id="toolbarMenu">
@@ -833,6 +909,7 @@
       const SIDEBAR_KEY = "spriteTrackerSidebarCollapsed";
       const FILTER_KEY = "spriteTrackerActiveFilter";
       const UNRELEASED_KEY = "spriteTrackerShowUnreleased";
+      const COMPACT_KEY = "spriteTrackerCompactMode";
       const SERVER_STATE_URL = location.protocol === "file:"
         ? "http://127.0.0.1:8765/api/state"
         : "/api/state";
@@ -846,11 +923,13 @@
       const toggleSidebar = document.querySelector("#toggleSidebar");
       const toggleControls = document.querySelector("#toggleControls");
       const toggleUnreleased = document.querySelector("#toggleUnreleased");
+      const toggleCompact = document.querySelector("#toggleCompact");
       const validFilters = ["all", "missing", "collected", "mastered", "hide-mastered"];
       let activeFilter = validFilters.includes(localStorage.getItem(FILTER_KEY))
         ? localStorage.getItem(FILTER_KEY)
         : "all";
       let showUnreleased = localStorage.getItem(UNRELEASED_KEY) === "true";
+      let compactMode = localStorage.getItem(COMPACT_KEY) === "true";
       let serverStateAvailable = false;
 
       const spriteAssets = [
@@ -860,92 +939,137 @@
         { id: "mat4", name: "Galaxy Water Sprite", image: "assets/sprites/mat4.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "mat5", name: "Gem Water Sprite", image: "assets/sprites/mat5.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "mat6", name: "Holofoil Water Sprite", image: "assets/sprites/mat6.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-water", name: "Cube Water Sprite", image: "assets/sprites/cube-water.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-water", name: "Quack Water Sprite", image: "assets/sprites/quack-water.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat7", name: "Earth Sprite", image: "assets/sprites/mat7.webp", rarity: "rare", dropRate: "12.83%", released: true, variant: "Base" },
         { id: "mat8", name: "Gold Earth Sprite", image: "assets/sprites/mat8.webp", rarity: "special", dropRate: "0.7%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat9", name: "Gummy Earth Sprite", image: "assets/sprites/mat9.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat10", name: "Galaxy Earth Sprite", image: "assets/sprites/mat10.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "mat11", name: "Gem Earth Sprite", image: "assets/sprites/mat11.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "mat12", name: "Holofoil Earth Sprite", image: "assets/sprites/mat12.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat12", name: "Holofoil Earth Sprite", image: "assets/sprites/mat12.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-earth", name: "Cube Earth Sprite", image: "assets/sprites/cube-earth.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-earth", name: "Quack Earth Sprite", image: "assets/sprites/quack-earth.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat13", name: "Fire Sprite", image: "assets/sprites/mat13.webp", rarity: "rare", dropRate: "12.45%", released: true, variant: "Base" },
         { id: "mat14", name: "Gold Fire Sprite", image: "assets/sprites/mat14.webp", rarity: "special", dropRate: "0.68%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat15", name: "Gummy Fire Sprite", image: "assets/sprites/mat15.webp", rarity: "special", dropRate: "0.68%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat16", name: "Galaxy Fire Sprite", image: "assets/sprites/mat16.webp", rarity: "special", dropRate: "0.27%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-fire", name: "Gem Fire Sprite", image: "assets/sprites/gem-fire.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "mat17", name: "Holofoil Fire Sprite", image: "assets/sprites/mat17.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-fire", name: "Cube Fire Sprite", image: "assets/sprites/cube-fire.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-fire", name: "Quack Fire Sprite", image: "assets/sprites/quack-fire.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat19", name: "Duck Sprite", image: "assets/sprites/mat19.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
         { id: "mat20", name: "Gold Duck Sprite", image: "assets/sprites/mat20.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat21", name: "Gummy Duck Sprite", image: "assets/sprites/mat21.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat22", name: "Galaxy Duck Sprite", image: "assets/sprites/mat22.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "mat23", name: "Gem Duck Sprite", image: "assets/sprites/mat23.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "holofoil-duck", name: "Holofoil Duck Sprite", image: "assets/sprites/holofoil-duck.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "holofoil-duck", name: "Holofoil Duck Sprite", image: "assets/sprites/holofoil-duck.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-duck", name: "Cube Duck Sprite", image: "assets/sprites/cube-duck.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-duck", name: "Quack Duck Sprite", image: "assets/sprites/quack-duck.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat24", name: "Ghost Sprite", image: "assets/sprites/mat24.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
         { id: "mat25", name: "Gold Ghost Sprite", image: "assets/sprites/mat25.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat26", name: "Gummy Ghost Sprite", image: "assets/sprites/mat26.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat27", name: "Galaxy Ghost Sprite", image: "assets/sprites/mat27.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-ghost", name: "Gem Ghost Sprite", image: "assets/sprites/gem-ghost.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "mat28", name: "Holofoil Ghost Sprite", image: "assets/sprites/mat28.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-ghost", name: "Cube Ghost Sprite", image: "assets/sprites/cube-ghost.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-ghost", name: "Quack Ghost Sprite", image: "assets/sprites/quack-ghost.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat39", name: "Dream Sprite", image: "assets/sprites/mat39.webp", rarity: "legendary", dropRate: "2.63%", released: true, variant: "Base" },
         { id: "mat40", name: "Gold Dream Sprite", image: "assets/sprites/mat40.webp", rarity: "special", dropRate: "0.03%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat41", name: "Gummy Dream Sprite", image: "assets/sprites/mat41.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat42", name: "Galaxy Dream Sprite", image: "assets/sprites/mat42.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
-        { id: "mat43", name: "Holofoil Dream Sprite", image: "assets/sprites/mat43.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "gem-dream", name: "Gem Dream Sprite", image: "assets/sprites/gem-dream.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "mat43", name: "Holofoil Dream Sprite", image: "assets/sprites/mat43.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-dream", name: "Cube Dream Sprite", image: "assets/sprites/cube-dream.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-dream", name: "Quack Dream Sprite", image: "assets/sprites/quack-dream.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat29", name: "Demon Sprite", image: "assets/sprites/mat29.webp", rarity: "epic", dropRate: "5.76%", released: true, variant: "Base" },
         { id: "mat30", name: "Gold Demon Sprite", image: "assets/sprites/mat30.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat31", name: "Gummy Demon Sprite", image: "assets/sprites/mat31.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
-        { id: "mat32", name: "Galaxy Demon Sprite", image: "assets/sprites/mat32.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "mat32", name: "Galaxy Demon Sprite", image: "assets/sprites/mat32.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "mat33", name: "Gem Demon Sprite", image: "assets/sprites/mat33.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "holofoil-demon", name: "Holofoil Demon Sprite", image: "assets/sprites/holofoil-demon.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "holofoil-demon", name: "Holofoil Demon Sprite", image: "assets/sprites/holofoil-demon.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-demon", name: "Cube Demon Sprite", image: "assets/sprites/cube-demon.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-demon", name: "Quack Demon Sprite", image: "assets/sprites/quack-demon.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat44", name: "Punk Sprite", image: "assets/sprites/mat44.webp", rarity: "legendary", dropRate: "1.98%", released: true, variant: "Base" },
         { id: "mat45", name: "Gold Punk Sprite", image: "assets/sprites/mat45.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat46", name: "Gummy Punk Sprite", image: "assets/sprites/mat46.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
-        { id: "mat47", name: "Galaxy Punk Sprite", image: "assets/sprites/mat47.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
-        { id: "mat48", name: "Holofoil Punk Sprite", image: "assets/sprites/mat48.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat47", name: "Galaxy Punk Sprite", image: "assets/sprites/mat47.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-punk", name: "Gem Punk Sprite", image: "assets/sprites/gem-punk.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "mat48", name: "Holofoil Punk Sprite", image: "assets/sprites/mat48.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-punk", name: "Cube Punk Sprite", image: "assets/sprites/cube-punk.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-punk", name: "Quack Punk Sprite", image: "assets/sprites/quack-punk.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat34", name: "King Sprite", image: "assets/sprites/mat34.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
         { id: "mat35", name: "Gold King Sprite", image: "assets/sprites/mat35.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat36", name: "Gummy King Sprite", image: "assets/sprites/mat36.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat37", name: "Galaxy King Sprite", image: "assets/sprites/mat37.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-king", name: "Gem King Sprite", image: "assets/sprites/gem-king.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "mat38", name: "Holofoil King Sprite", image: "assets/sprites/mat38.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-king", name: "Cube King Sprite", image: "assets/sprites/cube-king.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-king", name: "Quack King Sprite", image: "assets/sprites/quack-king.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat49", name: "Burnt Peanut", image: "assets/sprites/mat49.webp", rarity: "mythic", dropRate: "1.01%", released: true, variant: "Base" },
         { id: "mat50", name: "Zero Point Sprite", image: "assets/sprites/mat50.webp", rarity: "mythic", dropRate: "0.000098%", released: true, variant: "Base" },
         { id: "mat51", name: "Gold Zero Point Sprite", image: "assets/sprites/mat51.webp", rarity: "special", dropRate: "0.0000012%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat52", name: "Gummy Zero Point Sprite", image: "assets/sprites/mat52.webp", rarity: "special", dropRate: "0.0000006%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "mat53", name: "Galaxy Zero Point Sprite", image: "assets/sprites/mat53.webp", rarity: "special", dropRate: "0.0000004%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "mat54", name: "Gem Zero Point Sprite", image: "assets/sprites/mat54.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "mat55", name: "Holofoil Zero Point Sprite", image: "assets/sprites/mat55.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "mat55", name: "Holofoil Zero Point Sprite", image: "assets/sprites/mat55.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-zero-point", name: "Cube Zero Point Sprite", image: "assets/sprites/cube-zero-point.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-zero-point", name: "Quack Zero Point Sprite", image: "assets/sprites/quack-zero-point.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-fishy", name: "Fishy Sprite", image: "assets/sprites/v4110-fishy.webp", rarity: "rare", dropRate: "13.79%", released: true, variant: "Base" },
         { id: "v4110-gold-fishy", name: "Gold Fishy Sprite", image: "assets/sprites/v4110-gold-fishy.webp", rarity: "special", dropRate: "0.17%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-fishy", name: "Gummy Fishy Sprite", image: "assets/sprites/v4110-gummy-fishy.webp", rarity: "special", dropRate: "0.08%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-fishy", name: "Galaxy Fishy Sprite", image: "assets/sprites/v4110-galaxy-fishy.webp", rarity: "special", dropRate: "0.06%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
-        { id: "v4110-holofoil-fishy", name: "Holofoil Fishy Sprite", image: "assets/sprites/v4110-holofoil-fishy.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "gem-fishy", name: "Gem Fishy Sprite", image: "assets/sprites/gem-fishy.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "v4110-holofoil-fishy", name: "Holofoil Fishy Sprite", image: "assets/sprites/v4110-holofoil-fishy.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-fishy", name: "Cube Fishy Sprite", image: "assets/sprites/cube-fishy.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-fishy", name: "Quack Fishy Sprite", image: "assets/sprites/quack-fishy.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-soccer-striker", name: "Striker Sprite", image: "assets/sprites/v4110-soccer-striker.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
         { id: "v4110-gold-soccer-striker", name: "Gold Striker Sprite", image: "assets/sprites/v4110-gold-soccer-striker.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-soccer-striker", name: "Gummy Striker Sprite", image: "assets/sprites/v4110-gummy-soccer-striker.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-soccer-striker", name: "Galaxy Striker Sprite", image: "assets/sprites/v4110-galaxy-soccer-striker.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-striker", name: "Gem Striker Sprite", image: "assets/sprites/gem-striker.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "v4110-holofoil-soccer-striker", name: "Holofoil Striker Sprite", image: "assets/sprites/v4110-holofoil-soccer-striker.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-striker", name: "Cube Striker Sprite", image: "assets/sprites/cube-striker.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-striker", name: "Quack Striker Sprite", image: "assets/sprites/quack-striker.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-aura", name: "Aura Sprite", image: "assets/sprites/v4110-aura.webp", rarity: "epic", dropRate: "5.74%", released: true, variant: "Base" },
         { id: "v4110-gold-aura", name: "Gold Aura Sprite", image: "assets/sprites/v4110-gold-aura.webp", rarity: "special", dropRate: "0.07%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-aura", name: "Gummy Aura Sprite", image: "assets/sprites/v4110-gummy-aura.webp", rarity: "special", dropRate: "0.04%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-aura", name: "Galaxy Aura Sprite", image: "assets/sprites/v4110-galaxy-aura.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "v4110-gem-aura", name: "Gem Aura Sprite", image: "assets/sprites/v4110-gem-aura.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "v4110-holofoil-aura", name: "Holofoil Aura Sprite", image: "assets/sprites/v4110-holofoil-aura.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "v4110-holofoil-aura", name: "Holofoil Aura Sprite", image: "assets/sprites/v4110-holofoil-aura.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-aura", name: "Cube Aura Sprite", image: "assets/sprites/cube-aura.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-aura", name: "Quack Aura Sprite", image: "assets/sprites/quack-aura.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-boss", name: "Boss Sprite", image: "assets/sprites/v4110-boss.webp", rarity: "legendary", dropRate: "2.63%", released: true, variant: "Base" },
         { id: "v4110-gold-boss", name: "Gold Boss Sprite", image: "assets/sprites/v4110-gold-boss.webp", rarity: "special", dropRate: "0.03%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-boss", name: "Gummy Boss Sprite", image: "assets/sprites/v4110-gummy-boss.webp", rarity: "special", dropRate: "0.02%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-boss", name: "Galaxy Boss Sprite", image: "assets/sprites/v4110-galaxy-boss.webp", rarity: "special", dropRate: "0.01%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
-        { id: "v4110-holofoil-boss", name: "Holofoil Boss Sprite", image: "assets/sprites/v4110-holofoil-boss.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "gem-boss", name: "Gem Boss Sprite", image: "assets/sprites/gem-boss.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "v4110-holofoil-boss", name: "Holofoil Boss Sprite", image: "assets/sprites/v4110-holofoil-boss.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-boss", name: "Cube Boss Sprite", image: "assets/sprites/cube-boss.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-boss", name: "Quack Boss Sprite", image: "assets/sprites/quack-boss.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-grim-reaper", name: "Grim Sprite", image: "assets/sprites/v4110-grim-reaper.webp", rarity: "mythic", dropRate: "0.000098%", released: true, variant: "Base" },
         { id: "v4110-gold-grim-reaper", name: "Gold Grim Sprite", image: "assets/sprites/v4110-gold-grim-reaper.webp", rarity: "special", dropRate: "0.0000012%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-grim-reaper", name: "Gummy Grim Sprite", image: "assets/sprites/v4110-gummy-grim-reaper.webp", rarity: "special", dropRate: "0.0000006%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-grim-reaper", name: "Galaxy Grim Sprite", image: "assets/sprites/v4110-galaxy-grim-reaper.webp", rarity: "special", dropRate: "0.0000004%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
-        { id: "v4110-holofoil-grim-reaper", name: "Holofoil Grim Sprite", image: "assets/sprites/v4110-holofoil-grim-reaper.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "gem-grim", name: "Gem Grim Sprite", image: "assets/sprites/gem-grim.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "v4110-holofoil-grim-reaper", name: "Holofoil Grim Sprite", image: "assets/sprites/v4110-holofoil-grim-reaper.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-grim", name: "Cube Grim Sprite", image: "assets/sprites/cube-grim.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-grim", name: "Quack Grim Sprite", image: "assets/sprites/quack-grim.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: false, variant: "Base" },
         { id: "v4110-gold-air", name: "Gold Air Sprite", image: "assets/sprites/v4110-gold-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-air", name: "Gummy Air Sprite", image: "assets/sprites/v4110-gummy-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-air", name: "Galaxy Air Sprite", image: "assets/sprites/v4110-galaxy-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-air", name: "Gem Air Sprite", image: "assets/sprites/gem-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "v4110-holofoil-air", name: "Holofoil Air Sprite", image: "assets/sprites/v4110-holofoil-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-air", name: "Cube Air Sprite", image: "assets/sprites/cube-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-air", name: "Quack Air Sprite", image: "assets/sprites/quack-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "v4110-seven", name: "Seven Sprite", image: "assets/sprites/v4110-seven.webp", rarity: "legendary", dropRate: "0%", released: false, variant: "Base" },
         { id: "v4110-gold-seven", name: "Gold Seven Sprite", image: "assets/sprites/v4110-gold-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "v4110-gummy-seven", name: "Gummy Seven Sprite", image: "assets/sprites/v4110-gummy-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
         { id: "v4110-galaxy-seven", name: "Galaxy Seven Sprite", image: "assets/sprites/v4110-galaxy-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-seven", name: "Gem Seven Sprite", image: "assets/sprites/gem-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
         { id: "v4110-holofoil-seven", name: "Holofoil Seven Sprite", image: "assets/sprites/v4110-holofoil-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-seven", name: "Cube Seven Sprite", image: "assets/sprites/cube-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-seven", name: "Quack Seven Sprite", image: "assets/sprites/quack-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
       ];
       const SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length;
       spriteTotalLabel.textContent = SPRITE_TOTAL;
@@ -1278,6 +1402,18 @@
         setShowUnreleased(!showUnreleased);
       });
 
+      function setCompactMode(compact, persist = true) {
+        compactMode = Boolean(compact);
+        document.body.classList.toggle("compact-mode", compact);
+        toggleCompact.setAttribute("aria-pressed", compact ? "true" : "false");
+        toggleCompact.setAttribute("aria-label", compact ? "Use comfortable tiles" : "Use compact tiles");
+        if (persist) localStorage.setItem(COMPACT_KEY, compact ? "true" : "false");
+      }
+
+      toggleCompact.addEventListener("click", () => {
+        setCompactMode(!compactMode);
+      });
+
       search.addEventListener("input", applyFilters);
 
       function setSidebarCollapsed(collapsed) {
@@ -1331,6 +1467,7 @@
       setSidebarCollapsed(defaultSidebarCollapsed || storedSidebar === "true");
       setActiveFilter(localStorage.getItem(FILTER_KEY), false);
       setShowUnreleased(showUnreleased, false);
+      setCompactMode(compactMode, false);
       renderSprites();
       hydrateServerState();
     </script>

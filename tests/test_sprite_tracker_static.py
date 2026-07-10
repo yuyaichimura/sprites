@@ -1,3 +1,5 @@
+import hashlib
+import re
 from pathlib import Path
 
 
@@ -27,7 +29,7 @@ def test_tracker_renders_visible_reference_count():
 
     assert "SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length" in html
     assert "spriteTotalLabel.textContent = SPRITE_TOTAL" in html
-    assert 'id="spriteTotalLabel">76</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">66</span> sprite variants' in html
 
 
 def test_tracker_has_progress_and_filtering():
@@ -48,6 +50,21 @@ def test_tracker_has_progress_and_filtering():
     assert "exportData" in html
 
 
+def test_tracker_has_persistent_responsive_compact_mode():
+    html = INDEX.read_text()
+
+    assert 'id="toggleCompact"' in html
+    assert 'aria-label="Use compact tiles"' in html
+    assert 'const COMPACT_KEY = "spriteTrackerCompactMode"' in html
+    assert 'localStorage.getItem(COMPACT_KEY) === "true"' in html
+    assert "localStorage.setItem(COMPACT_KEY" in html
+    assert 'document.body.classList.toggle("compact-mode", compact)' in html
+    assert "body.compact-mode .row-cards" in html
+    assert "body.compact-mode .sprite-card" in html
+    assert "body.compact-mode .toggle" in html
+    assert "min-height: 2.75rem" in html
+
+
 def test_tracker_uses_fortnitegg_sprite_asset_urls():
     html = INDEX.read_text()
 
@@ -55,7 +72,7 @@ def test_tracker_uses_fortnitegg_sprite_asset_urls():
     assert '{ id: "mat1", name: "Water Sprite"' in html
     assert "fortnite-api.com/images/cosmetics/br/backpack_coldtrophy" not in html
     assert "Water Sprite" in html
-    assert "Quack Zero Point Sprite" not in html
+    assert '{ id: "quack-zero-point", name: "Quack Zero Point Sprite", image: "assets/sprites/quack-zero-point.webp"' in html
 
 
 def test_tracker_excludes_mastery_pod_and_groups_rows():
@@ -112,7 +129,7 @@ def test_tracker_uses_requested_sprite_row_order():
 def test_tracker_downloads_sprite_assets_locally():
     assert (SPRITE_ASSETS / "mat1.webp").exists()
     assert (SPRITE_ASSETS / "v4110-soccer-striker.webp").exists()
-    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 92
+    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 137
     assert not (SPRITE_ASSETS / "fortnitegg").exists()
     assert not (SPRITE_ASSETS / "mat0.webp").exists()
 
@@ -269,28 +286,57 @@ def test_tracker_syncs_released_holofoil_variants():
 
     released_holofoils = [
         "Holofoil Water Sprite",
-        "Holofoil Earth Sprite",
         "Holofoil Fire Sprite",
-        "Holofoil Fishy Sprite",
-        "Holofoil Duck Sprite",
         "Holofoil Ghost Sprite",
-        "Holofoil Demon Sprite",
         "Holofoil King Sprite",
         "Holofoil Striker Sprite",
-        "Holofoil Aura Sprite",
-        "Holofoil Punk Sprite",
-        "Holofoil Boss Sprite",
+    ]
+    unreleased_holofoils = [
+        "Holofoil Earth Sprite",
+        "Holofoil Duck Sprite",
         "Holofoil Dream Sprite",
+        "Holofoil Demon Sprite",
+        "Holofoil Punk Sprite",
         "Holofoil Zero Point Sprite",
+        "Holofoil Fishy Sprite",
+        "Holofoil Aura Sprite",
+        "Holofoil Boss Sprite",
         "Holofoil Grim Sprite",
+        "Holofoil Air Sprite",
+        "Holofoil Seven Sprite",
     ]
     for name in released_holofoils:
         assert f'name: "{name}"' in html
         snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
         assert "released: true" in snippet
+    for name in unreleased_holofoils:
+        assert f'name: "{name}"' in html
+        snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
+        assert "released: false" in snippet
 
     assert 'name: "Holofoil Burnt Peanut"' not in html
-    assert 'id="spriteTotalLabel">76</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">66</span> sprite variants' in html
+
+    entries = re.findall(r'\{ id: .*? released: (true|false), variant:', html)
+    assert len(entries) == 137
+    assert entries.count("true") == 66
+
+
+def test_tracker_includes_complete_fortnitegg_unreleased_catalog():
+    html = INDEX.read_text()
+
+    families = [
+        "Water", "Earth", "Fire", "Duck", "Ghost", "Dream", "Demon", "Punk", "King",
+        "Zero Point", "Fishy", "Striker", "Aura", "Boss", "Grim", "Air", "Seven",
+    ]
+    variants = ["Gem", "Holofoil", "Cube", "Quack"]
+    for family in families:
+        for variant in variants:
+            assert f'name: "{variant} {family} Sprite"' in html
+
+    assert 'name: "Holofoil Burnt Peanut"' not in html
+    assert 'name: "Cube Burnt Peanut"' not in html
+    assert 'name: "Quack Burnt Peanut"' not in html
 
 
 def test_tracker_holofoil_assets_exist():
@@ -310,6 +356,14 @@ def test_tracker_holofoil_assets_exist():
         "v4110-holofoil-aura.webp",
         "v4110-holofoil-boss.webp",
         "v4110-holofoil-grim-reaper.webp",
+        "v4110-holofoil-air.webp",
+        "v4110-holofoil-seven.webp",
     ]
     for asset in required_assets:
         assert (SPRITE_ASSETS / asset).exists()
+
+    hashes = {
+        hashlib.sha256((SPRITE_ASSETS / asset).read_bytes()).hexdigest()
+        for asset in required_assets
+    }
+    assert len(hashes) == len(required_assets)
