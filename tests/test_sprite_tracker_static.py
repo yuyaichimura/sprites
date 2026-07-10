@@ -27,7 +27,7 @@ def test_tracker_renders_visible_reference_count():
 
     assert "SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length" in html
     assert "spriteTotalLabel.textContent = SPRITE_TOTAL" in html
-    assert 'id="spriteTotalLabel">61</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">76</span> sprite variants' in html
 
 
 def test_tracker_has_progress_and_filtering():
@@ -112,7 +112,7 @@ def test_tracker_uses_requested_sprite_row_order():
 def test_tracker_downloads_sprite_assets_locally():
     assert (SPRITE_ASSETS / "mat1.webp").exists()
     assert (SPRITE_ASSETS / "v4110-soccer-striker.webp").exists()
-    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 82
+    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 92
     assert not (SPRITE_ASSETS / "fortnitegg").exists()
     assert not (SPRITE_ASSETS / "mat0.webp").exists()
 
@@ -262,3 +262,54 @@ def test_tracker_has_local_favicon():
     assert 'rel="icon"' in html
     assert 'assets/favicon.svg' in html
     assert (ROOT / "assets" / "favicon.svg").exists()
+
+
+def test_tracker_syncs_released_holofoil_variants():
+    html = INDEX.read_text()
+
+    released_holofoils = [
+        "Holofoil Water Sprite",
+        "Holofoil Earth Sprite",
+        "Holofoil Fire Sprite",
+        "Holofoil Fishy Sprite",
+        "Holofoil Duck Sprite",
+        "Holofoil Ghost Sprite",
+        "Holofoil Demon Sprite",
+        "Holofoil King Sprite",
+        "Holofoil Striker Sprite",
+        "Holofoil Aura Sprite",
+        "Holofoil Punk Sprite",
+        "Holofoil Boss Sprite",
+        "Holofoil Dream Sprite",
+        "Holofoil Zero Point Sprite",
+        "Holofoil Grim Sprite",
+    ]
+    for name in released_holofoils:
+        assert f'name: "{name}"' in html
+        snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
+        assert "released: true" in snippet
+
+    assert 'name: "Holofoil Burnt Peanut"' not in html
+    assert 'id="spriteTotalLabel">76</span> sprite variants' in html
+
+
+def test_tracker_holofoil_assets_exist():
+    required_assets = [
+        "mat6.webp",
+        "mat12.webp",
+        "mat17.webp",
+        "holofoil-duck.webp",
+        "mat28.webp",
+        "holofoil-demon.webp",
+        "mat38.webp",
+        "mat43.webp",
+        "mat48.webp",
+        "mat55.webp",
+        "v4110-holofoil-fishy.webp",
+        "v4110-holofoil-soccer-striker.webp",
+        "v4110-holofoil-aura.webp",
+        "v4110-holofoil-boss.webp",
+        "v4110-holofoil-grim-reaper.webp",
+    ]
+    for asset in required_assets:
+        assert (SPRITE_ASSETS / asset).exists()
