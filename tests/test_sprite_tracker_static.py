@@ -29,7 +29,7 @@ def test_tracker_renders_visible_reference_count():
 
     assert "SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length" in html
     assert "spriteTotalLabel.textContent = SPRITE_TOTAL" in html
-    assert 'id="spriteTotalLabel">66</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">83</span> sprite variants' in html
 
 
 def test_tracker_has_progress_and_filtering():
@@ -104,6 +104,7 @@ def test_tracker_uses_requested_sprite_row_order():
     assert "const groupOrder" in html
     group_order_block = html.split("const groupOrder = [", 1)[1].split("];", 1)[0]
     expected_order = [
+        '"Batman Sprite",',
         '"Water Sprite",',
         '"Earth Sprite",',
         '"Fire Sprite",',
@@ -113,6 +114,8 @@ def test_tracker_uses_requested_sprite_row_order():
         '"Demon Sprite",',
         '"Punk Sprite",',
         '"King Sprite",',
+        '"Pollo Sprite",',
+        '"Vini Jr. Sprite",',
         '"Burnt Peanut",',
         '"Fishy Sprite",',
         '"Striker Sprite",',
@@ -121,6 +124,7 @@ def test_tracker_uses_requested_sprite_row_order():
         '"Grim Sprite",',
         '"Air Sprite",',
         '"Seven Sprite",',
+        '"John Wick Sprite",',
     ]
     positions = [group_order_block.index(item) for item in expected_order]
     assert positions == sorted(positions)
@@ -129,7 +133,7 @@ def test_tracker_uses_requested_sprite_row_order():
 def test_tracker_downloads_sprite_assets_locally():
     assert (SPRITE_ASSETS / "mat1.webp").exists()
     assert (SPRITE_ASSETS / "v4110-soccer-striker.webp").exists()
-    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 137
+    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 148
     assert not (SPRITE_ASSETS / "fortnitegg").exists()
     assert not (SPRITE_ASSETS / "mat0.webp").exists()
 
@@ -178,6 +182,10 @@ def test_tracker_includes_fortnitegg_sprite_assets():
     assert "Boss Sprite" in html
     assert "Seven Sprite" in html
     assert "Air Sprite" in html
+    assert "Batman Sprite" in html
+    assert "Pollo Sprite" in html
+    assert "Vini Jr. Sprite" in html
+    assert "John Wick Sprite" in html
     assert "assets/sprites/v4110-grim-reaper.webp" in html
     assert "assets/sprites/v4110-soccer-striker.webp" in html
     assert "FNAssist v41.10" not in html
@@ -229,7 +237,7 @@ def test_tracker_includes_fortnitegg_metadata():
     assert "dropRate" in html
     assert "availability" in html
     assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "12.83%", released: true' in html
-    assert '{ id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: false' in html
+    assert '{ id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: true' in html
 
 
 def test_sprite_cards_show_verified_player_skills_only():
@@ -290,6 +298,9 @@ def test_tracker_syncs_released_holofoil_variants():
         "Holofoil Ghost Sprite",
         "Holofoil King Sprite",
         "Holofoil Striker Sprite",
+        "Holofoil Batman Sprite",
+        "Holofoil Air Sprite",
+        "Holofoil Seven Sprite",
     ]
     unreleased_holofoils = [
         "Holofoil Earth Sprite",
@@ -302,8 +313,6 @@ def test_tracker_syncs_released_holofoil_variants():
         "Holofoil Aura Sprite",
         "Holofoil Boss Sprite",
         "Holofoil Grim Sprite",
-        "Holofoil Air Sprite",
-        "Holofoil Seven Sprite",
     ]
     for name in released_holofoils:
         assert f'name: "{name}"' in html
@@ -315,18 +324,60 @@ def test_tracker_syncs_released_holofoil_variants():
         assert "released: false" in snippet
 
     assert 'name: "Holofoil Burnt Peanut"' not in html
-    assert 'id="spriteTotalLabel">66</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">83</span> sprite variants' in html
 
     entries = re.findall(r'\{ id: .*? released: (true|false), variant:', html)
-    assert len(entries) == 137
-    assert entries.count("true") == 66
+    assert len(entries) == 148
+    assert entries.count("true") == 83
+
+
+def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
+    html = INDEX.read_text()
+
+    released = [
+        "Batman Sprite",
+        "Gold Batman Sprite",
+        "Gummy Batman Sprite",
+        "Galaxy Batman Sprite",
+        "Holofoil Batman Sprite",
+        "Pollo Sprite",
+        "Vini Jr. Sprite",
+        "Air Sprite",
+        "Gold Air Sprite",
+        "Gummy Air Sprite",
+        "Galaxy Air Sprite",
+        "Holofoil Air Sprite",
+        "Seven Sprite",
+        "Gold Seven Sprite",
+        "Gummy Seven Sprite",
+        "Galaxy Seven Sprite",
+        "Holofoil Seven Sprite",
+    ]
+    unreleased = [
+        "Gem Batman Sprite",
+        "Cube Batman Sprite",
+        "Quack Batman Sprite",
+        "Gem Air Sprite",
+        "Cube Air Sprite",
+        "Quack Air Sprite",
+        "Gem Seven Sprite",
+        "Cube Seven Sprite",
+        "Quack Seven Sprite",
+        "John Wick Sprite",
+    ]
+    for name in released:
+        snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
+        assert "released: true" in snippet
+    for name in unreleased:
+        snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
+        assert "released: false" in snippet
 
 
 def test_tracker_includes_complete_fortnitegg_unreleased_catalog():
     html = INDEX.read_text()
 
     families = [
-        "Water", "Earth", "Fire", "Duck", "Ghost", "Dream", "Demon", "Punk", "King",
+        "Batman", "Water", "Earth", "Fire", "Duck", "Ghost", "Dream", "Demon", "Punk", "King",
         "Zero Point", "Fishy", "Striker", "Aura", "Boss", "Grim", "Air", "Seven",
     ]
     variants = ["Gem", "Holofoil", "Cube", "Quack"]
@@ -337,6 +388,9 @@ def test_tracker_includes_complete_fortnitegg_unreleased_catalog():
     assert 'name: "Holofoil Burnt Peanut"' not in html
     assert 'name: "Cube Burnt Peanut"' not in html
     assert 'name: "Quack Burnt Peanut"' not in html
+    assert 'name: "Gold Pollo Sprite"' not in html
+    assert 'name: "Gold Vini Jr. Sprite"' not in html
+    assert 'name: "Gold John Wick Sprite"' not in html
 
 
 def test_tracker_holofoil_assets_exist():

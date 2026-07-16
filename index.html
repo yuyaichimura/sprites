@@ -848,7 +848,7 @@
       <aside class="side">
         <section class="masthead" aria-labelledby="page-title">
           <h1 id="page-title">Sprite Tracker</h1>
-          <p class="subhead">Fortnite Runners, <span id="spriteTotalLabel">66</span> sprite variants</p>
+          <p class="subhead">Fortnite Runners, <span id="spriteTotalLabel">83</span> sprite variants</p>
         </section>
 
         <section class="drawer" aria-label="Data">
@@ -875,8 +875,8 @@
                 </button>
               </div>
               <div class="toolbar-progress" aria-label="Progress">
-                <span class="progress-pill"><strong id="collectedCount">0/66</strong> Collected</span>
-                <span class="progress-pill"><strong id="masteredCount">0/66</strong> Mastered</span>
+                <span class="progress-pill"><strong id="collectedCount">0/83</strong> Collected</span>
+                <span class="progress-pill"><strong id="masteredCount">0/83</strong> Mastered</span>
               </div>
               <button id="toggleCompact" class="tool compact-toggle" type="button" aria-pressed="false" aria-label="Use compact tiles">Compact</button>
             </div>
@@ -933,6 +933,14 @@
       let serverStateAvailable = false;
 
       const spriteAssets = [
+        { id: "batman", name: "Batman Sprite", image: "assets/sprites/batman.webp", rarity: "mythic", dropRate: "0%", released: true, variant: "Base" },
+        { id: "gold-batman", name: "Gold Batman Sprite", image: "assets/sprites/gold-batman.webp", rarity: "special", dropRate: "0%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "gummy-batman", name: "Gummy Batman Sprite", image: "assets/sprites/gummy-batman.webp", rarity: "special", dropRate: "0%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "galaxy-batman", name: "Galaxy Batman Sprite", image: "assets/sprites/galaxy-batman.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "gem-batman", name: "Gem Batman Sprite", image: "assets/sprites/gem-batman.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
+        { id: "holofoil-batman", name: "Holofoil Batman Sprite", image: "assets/sprites/holofoil-batman.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "cube-batman", name: "Cube Batman Sprite", image: "assets/sprites/cube-batman.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
+        { id: "quack-batman", name: "Quack Batman Sprite", image: "assets/sprites/quack-batman.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
         { id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "12.83%", released: true, variant: "Base" },
         { id: "mat2", name: "Gold Water Sprite", image: "assets/sprites/mat2.webp", rarity: "special", dropRate: "0.7%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
         { id: "mat3", name: "Gummy Water Sprite", image: "assets/sprites/mat3.webp", rarity: "special", dropRate: "0.28%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
@@ -1005,6 +1013,8 @@
         { id: "mat38", name: "Holofoil King Sprite", image: "assets/sprites/mat38.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
         { id: "cube-king", name: "Cube King Sprite", image: "assets/sprites/cube-king.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
         { id: "quack-king", name: "Quack King Sprite", image: "assets/sprites/quack-king.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
+        { id: "pollo", name: "Pollo Sprite", image: "assets/sprites/pollo.webp", rarity: "mythic", dropRate: "0%", released: true, variant: "Base" },
+        { id: "vini-jr", name: "Vini Jr. Sprite", image: "assets/sprites/vini-jr.webp", rarity: "mythic", dropRate: "0%", released: true, variant: "Base" },
         { id: "mat49", name: "Burnt Peanut", image: "assets/sprites/mat49.webp", rarity: "mythic", dropRate: "1.01%", released: true, variant: "Base" },
         { id: "mat50", name: "Zero Point Sprite", image: "assets/sprites/mat50.webp", rarity: "mythic", dropRate: "0.000098%", released: true, variant: "Base" },
         { id: "mat51", name: "Gold Zero Point Sprite", image: "assets/sprites/mat51.webp", rarity: "special", dropRate: "0.0000012%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
@@ -1054,27 +1064,29 @@
         { id: "v4110-holofoil-grim-reaper", name: "Holofoil Grim Sprite", image: "assets/sprites/v4110-holofoil-grim-reaper.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
         { id: "cube-grim", name: "Cube Grim Sprite", image: "assets/sprites/cube-grim.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
         { id: "quack-grim", name: "Quack Grim Sprite", image: "assets/sprites/quack-grim.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
-        { id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: false, variant: "Base" },
-        { id: "v4110-gold-air", name: "Gold Air Sprite", image: "assets/sprites/v4110-gold-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
-        { id: "v4110-gummy-air", name: "Gummy Air Sprite", image: "assets/sprites/v4110-gummy-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
-        { id: "v4110-galaxy-air", name: "Galaxy Air Sprite", image: "assets/sprites/v4110-galaxy-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: true, variant: "Base" },
+        { id: "v4110-gold-air", name: "Gold Air Sprite", image: "assets/sprites/v4110-gold-air.webp", rarity: "special", dropRate: "0%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-air", name: "Gummy Air Sprite", image: "assets/sprites/v4110-gummy-air.webp", rarity: "special", dropRate: "0%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-air", name: "Galaxy Air Sprite", image: "assets/sprites/v4110-galaxy-air.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "gem-air", name: "Gem Air Sprite", image: "assets/sprites/gem-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "v4110-holofoil-air", name: "Holofoil Air Sprite", image: "assets/sprites/v4110-holofoil-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "v4110-holofoil-air", name: "Holofoil Air Sprite", image: "assets/sprites/v4110-holofoil-air.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
         { id: "cube-air", name: "Cube Air Sprite", image: "assets/sprites/cube-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
         { id: "quack-air", name: "Quack Air Sprite", image: "assets/sprites/quack-air.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
-        { id: "v4110-seven", name: "Seven Sprite", image: "assets/sprites/v4110-seven.webp", rarity: "legendary", dropRate: "0%", released: false, variant: "Base" },
-        { id: "v4110-gold-seven", name: "Gold Seven Sprite", image: "assets/sprites/v4110-gold-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
-        { id: "v4110-gummy-seven", name: "Gummy Seven Sprite", image: "assets/sprites/v4110-gummy-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
-        { id: "v4110-galaxy-seven", name: "Galaxy Seven Sprite", image: "assets/sprites/v4110-galaxy-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
+        { id: "v4110-seven", name: "Seven Sprite", image: "assets/sprites/v4110-seven.webp", rarity: "legendary", dropRate: "0%", released: true, variant: "Base" },
+        { id: "v4110-gold-seven", name: "Gold Seven Sprite", image: "assets/sprites/v4110-gold-seven.webp", rarity: "special", dropRate: "0%", released: true, variant: "Gold", variantSkill: "Gain 3x bonus XP from eliminations" },
+        { id: "v4110-gummy-seven", name: "Gummy Seven Sprite", image: "assets/sprites/v4110-gummy-seven.webp", rarity: "special", dropRate: "0%", released: true, variant: "Gummy", variantSkill: "Gain 20% more Sprite Dust upon Extraction" },
+        { id: "v4110-galaxy-seven", name: "Galaxy Seven Sprite", image: "assets/sprites/v4110-galaxy-seven.webp", rarity: "special", dropRate: "0%", released: true, variant: "Galaxy", variantSkill: "Gain 30% more Ammunition when looting" },
         { id: "gem-seven", name: "Gem Seven Sprite", image: "assets/sprites/gem-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Gem", variantSkill: "Take 30% less Fall damage" },
-        { id: "v4110-holofoil-seven", name: "Holofoil Seven Sprite", image: "assets/sprites/v4110-holofoil-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
+        { id: "v4110-holofoil-seven", name: "Holofoil Seven Sprite", image: "assets/sprites/v4110-holofoil-seven.webp", rarity: "special", dropRate: "0%", released: true, variant: "Holofoil", variantSkill: "5% squad chance to find rare Sprite variants from chests" },
         { id: "cube-seven", name: "Cube Seven Sprite", image: "assets/sprites/cube-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Cube" },
         { id: "quack-seven", name: "Quack Seven Sprite", image: "assets/sprites/quack-seven.webp", rarity: "special", dropRate: "0%", released: false, variant: "Quack" },
+        { id: "john-wick", name: "John Wick Sprite", image: "assets/sprites/john-wick.webp", rarity: "mythic", dropRate: "0%", released: false, variant: "Base" },
       ];
       const SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length;
       spriteTotalLabel.textContent = SPRITE_TOTAL;
       const variantPrefixes = ["Gold", "Gummy", "Galaxy", "Gem", "Holofoil"];
       const spriteSkills = {
+        "Batman Sprite": "Bat Cape launch",
         "Earth Sprite": "Rare chest boost",
         "Fire Sprite": "Fire burst on damage",
         "Water Sprite": "Shield regen in water",
@@ -1082,6 +1094,8 @@
         "Demon Sprite": "Heal on elim",
         "Ghost Sprite": "Reload invisibility",
         "King Sprite": "Pickaxe damage up",
+        "Pollo Sprite": "Squad shield on elim",
+        "Vini Jr. Sprite": "Slidekick fire-rate boost",
         "Punk Sprite": "Random chest bonus",
         "Dream Sprite": "Loot each level",
         "Zero Point Sprite": "Heal bubble",
@@ -1095,6 +1109,7 @@
         "Seven Sprite": "Enemy foot trails",
       };
       const spriteLevelEffects = {
+        "Batman Sprite": ["Bat Cape launch", "Bat Cape launch", "Bat Cape launch", "Bat Cape launch", "Bat Cape launch"],
         "Water Sprite": ["2 Shield/tick", "3 Shield/tick", "4 Shield/tick", "5 Shield/tick", "6 Shield/tick"],
         "Earth Sprite": ["10% rare loot", "12.5% rare loot", "15% rare loot", "17.5% rare loot", "20% rare loot"],
         "Fire Sprite": ["150 dmg trigger", "125 dmg trigger", "100 dmg trigger", "75 dmg trigger", "50 dmg trigger"],
@@ -1103,6 +1118,8 @@
         "Dream Sprite": ["Loot I", "Loot II", "Loot III", "Loot IV", "Max legendary loot"],
         "Demon Sprite": ["10 heal/elim", "15 heal/elim", "20 heal/elim", "25 heal/elim", "30 heal/elim"],
         "King Sprite": ["+30 pickaxe dmg", "+40 pickaxe dmg", "+60 pickaxe dmg", "+80 pickaxe dmg", "+120 pickaxe dmg"],
+        "Pollo Sprite": ["6s shield regen", "7s shield regen", "8s shield regen", "9s shield regen", "10s shield regen"],
+        "Vini Jr. Sprite": ["40 dmg / 10% fire rate", "45 dmg / 20% fire rate", "50 dmg / 30% fire rate", "55 dmg / 40% fire rate", "60 dmg / 50% fire rate"],
         "Burnt Peanut": ["20% more loot", "30% more loot", "40% more loot", "50% more loot", "60% loot + mythic chance"],
         "Zero Point Sprite": ["6s bubble", "7s bubble", "8s bubble", "9s bubble", "10s bubble"],
         "Fishy Sprite": ["25% swim / 10% move", "50% swim / 20% move", "100% swim / 30% move", "150% swim / 40% move", "200% swim / 50% move"],
@@ -1114,6 +1131,7 @@
         "Seven Sprite": ["10s trails", "15s trails", "20s trails", "25s trails", "30s trails"],
       };
       const groupOrder = [
+        "Batman Sprite",
         "Water Sprite",
         "Earth Sprite",
         "Fire Sprite",
@@ -1123,6 +1141,8 @@
         "Demon Sprite",
         "Punk Sprite",
         "King Sprite",
+        "Pollo Sprite",
+        "Vini Jr. Sprite",
         "Burnt Peanut",
         "Fishy Sprite",
         "Striker Sprite",
@@ -1131,6 +1151,7 @@
         "Grim Sprite",
         "Air Sprite",
         "Seven Sprite",
+        "John Wick Sprite",
       ];
       const sprites = spriteAssets.map((sprite, index) => {
         const group = sprite.name.replace(new RegExp(`^(${variantPrefixes.join("|")})\\s+`), "");
