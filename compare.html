@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sprite Compare</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: oklch(96% 0.018 78);
+        --panel: oklch(99% 0.012 86);
+        --panel-2: oklch(93% 0.02 92);
+        --ink: oklch(22% 0.035 268);
+        --muted: oklch(48% 0.028 263);
+        --line: oklch(78% 0.035 78);
+        --accent: oklch(64% 0.19 35);
+        --left: oklch(64% 0.17 248);
+        --right: oklch(66% 0.16 145);
+        --both: oklch(62% 0.18 302);
+        --missing: oklch(67% 0.09 55);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 12% 16%, oklch(88% 0.13 197 / 0.5), transparent 27rem),
+          radial-gradient(circle at 92% 5%, oklch(83% 0.15 38 / 0.38), transparent 24rem),
+          linear-gradient(145deg, oklch(98% 0.02 89), var(--paper) 48%, oklch(93% 0.035 103));
+        color: var(--ink);
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .shell {
+        display: grid;
+        gap: 0.8rem;
+        width: min(100%, 92rem);
+        margin: 0 auto;
+        padding: 0.8rem;
+      }
+
+      .topbar,
+      .compare-inputs,
+      .results-panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 12px 30px oklch(28% 0.04 55 / 0.11);
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.7rem;
+        padding: 0.75rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.35rem;
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .subhead {
+        margin: 0.24rem 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .nav-actions,
+      .filters,
+      .mode-switch,
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.42rem;
+      }
+
+      .tool,
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.3rem;
+        padding: 0 0.72rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 760;
+        text-decoration: none;
+        transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
+      }
+
+      .tool:hover,
+      .chip:hover {
+        transform: translateY(-1px);
+        border-color: oklch(64% 0.13 78);
+      }
+
+      .chip.active {
+        border-color: var(--accent);
+        background: oklch(91% 0.085 50);
+      }
+
+      .compare-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+        padding: 0.75rem;
+      }
+
+      .input-panel {
+        display: grid;
+        gap: 0.48rem;
+        min-width: 0;
+      }
+
+      label {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .name-input,
+      .json-input,
+      .search {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: oklch(98% 0.012 86);
+        color: var(--ink);
+      }
+
+      .name-input,
+      .search {
+        min-height: 2.35rem;
+        padding: 0 0.65rem;
+      }
+
+      .json-input {
+        min-height: 8.5rem;
+        resize: vertical;
+        padding: 0.65rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.82rem;
+        line-height: 1.45;
+      }
+
+      .status {
+        min-height: 1.25rem;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .results-panel {
+        display: grid;
+        gap: 0.7rem;
+        padding: 0.75rem;
+      }
+
+      .control-row {
+        display: grid;
+        grid-template-columns: minmax(12rem, 1fr) auto;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      .stat {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.3rem;
+        min-height: 2.25rem;
+        padding: 0.15rem 0.58rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--panel-2);
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .stat strong {
+        color: var(--ink);
+        font-size: 1.08rem;
+        line-height: 1;
+      }
+
+      .compare-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+        gap: 0.55rem;
+      }
+
+      .compare-card {
+        display: grid;
+        grid-template-rows: 4.6rem minmax(2.6rem, auto) auto;
+        gap: 0.38rem;
+        min-height: 9.2rem;
+        overflow: hidden;
+        padding: 0.55rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .sprite-stage {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        border-radius: 7px;
+        background:
+          linear-gradient(145deg, oklch(98% 0.01 90), oklch(91% 0.03 100)),
+          radial-gradient(circle at 50% 100%, oklch(73% 0.14 150 / 0.32), transparent 42%);
+      }
+
+      .sprite-image {
+        display: block;
+        width: min(4.5rem, 90%);
+        height: min(4.3rem, 90%);
+        object-fit: contain;
+        pointer-events: none;
+        filter: drop-shadow(0 0.35rem 0.45rem oklch(28% 0.04 55 / 0.22));
+      }
+
+      .meta {
+        display: grid;
+        gap: 0.22rem;
+        min-width: 0;
+      }
+
+      .name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.88rem;
+        font-weight: 850;
+      }
+
+      .detail {
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 760;
+      }
+
+      .compare-state {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.35rem;
+      }
+
+      .owner {
+        display: grid;
+        place-items: center;
+        min-height: 1.85rem;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel-2);
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 850;
+      }
+
+      .owner.has.left {
+        border-color: var(--left);
+        background: oklch(91% 0.055 248);
+        color: oklch(32% 0.09 248);
+      }
+
+      .owner.has.right {
+        border-color: var(--right);
+        background: oklch(91% 0.055 145);
+        color: oklch(30% 0.08 145);
+      }
+
+      .result-badge {
+        grid-column: 1 / -1;
+        display: grid;
+        place-items: center;
+        min-height: 1.85rem;
+        border-radius: 6px;
+        color: oklch(99% 0.008 90);
+        font-size: 0.72rem;
+        font-weight: 900;
+      }
+
+      .compare-card.both .result-badge {
+        background: var(--both);
+      }
+
+      .compare-card.only-left .result-badge,
+      .compare-card.needs-right .result-badge {
+        background: var(--left);
+      }
+
+      .compare-card.only-right .result-badge,
+      .compare-card.needs-left .result-badge {
+        background: var(--right);
+      }
+
+      .compare-card.neither .result-badge {
+        background: var(--missing);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .name-input:focus,
+      .json-input:focus,
+      .search:focus,
+      .tool:focus-visible,
+      .chip:focus-visible {
+        outline: 3px solid oklch(62% 0.18 225 / 0.34);
+        outline-offset: 2px;
+      }
+
+      @media (max-width: 760px) {
+        .shell {
+          padding: 0.6rem;
+        }
+
+        .topbar,
+        .compare-inputs,
+        .results-panel {
+          padding: 0.6rem;
+        }
+
+        .compare-inputs,
+        .control-row {
+          grid-template-columns: 1fr;
+        }
+
+        .compare-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .compare-card {
+          grid-template-rows: 4.2rem auto auto;
+          min-height: 9.1rem;
+          padding: 0.45rem;
+        }
+
+        .tool,
+        .chip {
+          min-height: 2.65rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>Sprite Compare</h1>
+          <p class="subhead">Paste two tracker exports to see who has each sprite.</p>
+        </div>
+        <nav class="nav-actions" aria-label="Navigation">
+          <a class="tool" href="/sprites">Tracker</a>
+          <button class="tool" id="compareNow" type="button">Compare</button>
+        </nav>
+      </header>
+
+      <section class="compare-inputs" aria-label="Tracker exports">
+        <div class="input-panel">
+          <label for="leftName">Left player</label>
+          <input class="name-input" id="leftName" value="Player 1" aria-label="Left player name">
+          <label for="leftJson">Export JSON</label>
+          <textarea class="json-input" id="leftJson" spellcheck="false" aria-label="Left tracker export JSON"></textarea>
+          <div class="status" id="leftStatus"></div>
+        </div>
+        <div class="input-panel">
+          <label for="rightName">Right player</label>
+          <input class="name-input" id="rightName" value="Player 2" aria-label="Right player name">
+          <label for="rightJson">Export JSON</label>
+          <textarea class="json-input" id="rightJson" spellcheck="false" aria-label="Right tracker export JSON"></textarea>
+          <div class="status" id="rightStatus"></div>
+        </div>
+      </section>
+
+      <section class="results-panel" aria-label="Comparison results">
+        <div class="control-row">
+          <input class="search" id="search" type="search" placeholder="Search" aria-label="Search comparison results">
+          <div class="mode-switch" aria-label="Compare mode">
+            <button class="chip active" type="button" data-mode="collected">Collected</button>
+            <button class="chip" type="button" data-mode="mastered">Mastered</button>
+          </div>
+        </div>
+        <div class="filters" aria-label="Result filters">
+          <button class="chip active" type="button" data-filter="all">All</button>
+          <button class="chip" type="button" data-filter="only-left">Only left</button>
+          <button class="chip" type="button" data-filter="only-right">Only right</button>
+          <button class="chip" type="button" data-filter="both">Both</button>
+          <button class="chip" type="button" data-filter="neither">Neither</button>
+          <button class="chip" type="button" data-filter="needs-left">Left needs</button>
+          <button class="chip" type="button" data-filter="needs-right">Right needs</button>
+        </div>
+        <div class="stats" id="stats" aria-label="Comparison summary"></div>
+        <div class="compare-grid" id="compareGrid" aria-label="Compared sprites"></div>
+      </section>
+    </main>
+
+    <script>
+      const leftJson = document.querySelector("#leftJson");
+      const rightJson = document.querySelector("#rightJson");
+      const leftName = document.querySelector("#leftName");
+      const rightName = document.querySelector("#rightName");
+      const leftStatus = document.querySelector("#leftStatus");
+      const rightStatus = document.querySelector("#rightStatus");
+      const compareGrid = document.querySelector("#compareGrid");
+      const stats = document.querySelector("#stats");
+      const search = document.querySelector("#search");
+      const CODE_PREFIX = "spr1.";
+      let catalog = [];
+      let compareMode = "collected";
+      let activeFilter = "all";
+      const assetPrefix = location.pathname.startsWith("/sprites/") ? "/" : "";
+
+      async function loadCatalog() {
+        const trackerHtml = await fetch("index.html").then((response) => response.text());
+        const catalogMatch = trackerHtml.match(/const spriteAssets = \[([\s\S]*?)\];\s*const SPRITE_TOTAL/);
+        if (!catalogMatch) throw new Error("Sprite catalog not found");
+        const spriteAssets = new Function(`return [${catalogMatch[1]}];`)();
+        return spriteAssets.map((sprite, index) => ({
+          ...sprite,
+          number: index + 1,
+          searchable: `${sprite.name} ${sprite.rarity} ${sprite.variant} ${sprite.dropRate}`.toLowerCase(),
+        }));
+      }
+
+      function parseTrackerState(text, statusNode) {
+        if (!text.trim()) {
+          statusNode.textContent = "Paste an export JSON blob.";
+          return {};
+        }
+        try {
+          const parsed = parseStateInput(text);
+          const source = parsed && typeof parsed === "object" && parsed.state ? parsed.state : parsed;
+          const normalized = {};
+          for (const [id, value] of Object.entries(source || {})) {
+            if (!value || typeof value !== "object") continue;
+            const mastered = Boolean(value.mastered);
+            normalized[id] = {
+              collected: Boolean(value.collected) || mastered,
+              mastered,
+            };
+          }
+          statusNode.textContent = `${Object.keys(normalized).length} sprite statuses loaded.`;
+          return normalized;
+        } catch {
+          statusNode.textContent = "That JSON could not be parsed.";
+          return {};
+        }
+      }
+
+      function fromUrlBase64(value) {
+        const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+        return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
+      }
+
+      function decodeStateCode(text) {
+        const bytes = fromUrlBase64(text.slice(CODE_PREFIX.length));
+        return catalog.reduce((next, sprite, index) => {
+          const bitIndex = index * 2;
+          const bits = (bytes[Math.floor(bitIndex / 8)] >> (bitIndex % 8)) & 3;
+          next[sprite.id] = {
+            collected: bits === 1 || bits === 3,
+            mastered: bits === 2 || bits === 3,
+          };
+          if (next[sprite.id].mastered) next[sprite.id].collected = true;
+          return next;
+        }, {});
+      }
+
+      function parseStateInput(input) {
+        const text = input.trim();
+        if (text.startsWith(CODE_PREFIX)) return decodeStateCode(text);
+        return JSON.parse(text);
+      }
+
+      function hasSprite(state, id) {
+        const value = state[id] || {};
+        return compareMode === "mastered"
+          ? Boolean(value.mastered)
+          : Boolean(value.collected) || Boolean(value.mastered);
+      }
+
+      function renderCompare() {
+        const leftState = parseTrackerState(leftJson.value, leftStatus);
+        const rightState = parseTrackerState(rightJson.value, rightStatus);
+        const leftLabel = leftName.value.trim() || "Left";
+        const rightLabel = rightName.value.trim() || "Right";
+        const query = search.value.trim().toLowerCase();
+        const counts = { "only-left": 0, "only-right": 0, both: 0, neither: 0 };
+        compareGrid.innerHTML = "";
+
+        for (const sprite of catalog.filter((sprite) => sprite.released)) {
+          const leftHas = hasSprite(leftState, sprite.id);
+          const rightHas = hasSprite(rightState, sprite.id);
+          const status = leftHas && rightHas
+            ? "both"
+            : leftHas && !rightHas
+              ? "only-left"
+              : rightHas && !leftHas
+                ? "only-right"
+                : "neither";
+          counts[status] += 1;
+          const needs = status === "only-left" ? "needs-right" : status === "only-right" ? "needs-left" : status;
+          const matchesFilter = activeFilter === "all" || activeFilter === status || activeFilter === needs;
+          const matchesQuery = !query || sprite.searchable.includes(query);
+          const card = document.createElement("article");
+          card.className = `compare-card ${status} ${needs}${matchesFilter && matchesQuery ? "" : " hidden"}`;
+          card.dataset.status = status;
+          card.dataset.needs = needs;
+          card.innerHTML = `
+            <div class="sprite-stage">
+              <img class="sprite-image" src="${assetPrefix}${sprite.image}" alt="${sprite.name}" loading="lazy">
+            </div>
+            <div class="meta">
+              <span class="name">${sprite.name}</span>
+              <span class="detail">#${String(sprite.number).padStart(2, "0")} ${sprite.rarity} ${sprite.dropRate}</span>
+            </div>
+            <div class="compare-state">
+              <span class="owner left ${leftHas ? "has" : ""}">${leftLabel}</span>
+              <span class="owner right ${rightHas ? "has" : ""}">${rightLabel}</span>
+              <span class="result-badge">${labelForStatus(status, leftLabel, rightLabel)}</span>
+            </div>
+          `;
+          compareGrid.append(card);
+        }
+
+        stats.innerHTML = `
+          <span class="stat"><strong>${counts.both}</strong> Both</span>
+          <span class="stat"><strong>${counts["only-left"]}</strong> ${rightLabel} needs</span>
+          <span class="stat"><strong>${counts["only-right"]}</strong> ${leftLabel} needs</span>
+          <span class="stat"><strong>${counts.neither}</strong> Neither</span>
+        `;
+      }
+
+      function labelForStatus(status, leftLabel, rightLabel) {
+        if (status === "both") return "Both";
+        if (status === "only-left") return `${rightLabel} needs`;
+        if (status === "only-right") return `${leftLabel} needs`;
+        return "Neither";
+      }
+
+      document.querySelector("#compareNow").addEventListener("click", renderCompare);
+      [leftJson, rightJson, leftName, rightName, search].forEach((node) => {
+        node.addEventListener("input", renderCompare);
+      });
+      document.querySelectorAll("[data-mode]").forEach((button) => {
+        button.addEventListener("click", () => {
+          compareMode = button.dataset.mode;
+          document.querySelectorAll("[data-mode]").forEach((item) => item.classList.toggle("active", item === button));
+          renderCompare();
+        });
+      });
+      document.querySelectorAll("[data-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeFilter = button.dataset.filter;
+          document.querySelectorAll("[data-filter]").forEach((item) => item.classList.toggle("active", item === button));
+          renderCompare();
+        });
+      });
+
+      loadCatalog()
+        .then((items) => {
+          catalog = items;
+          renderCompare();
+        })
+        .catch(() => {
+          leftStatus.textContent = "Could not load sprite catalog.";
+          rightStatus.textContent = "Could not load sprite catalog.";
+        });
+    </script>
+  </body>
+</html>

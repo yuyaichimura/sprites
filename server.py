@@ -13,7 +13,19 @@ DEFAULT_STATE_PATH = ROOT / "sprite-state.json"
 
 
 def is_sprite_key(key: str) -> bool:
-    return key.startswith("mat") or key.startswith("v4110-")
+    known_exact = {"batman", "pollo", "vini-jr", "john-wick", "holofoil-duck", "holofoil-demon"}
+    known_prefixes = (
+        "mat",
+        "v4110-",
+        "gold-",
+        "gummy-",
+        "galaxy-",
+        "gem-",
+        "holofoil-",
+        "cube-",
+        "quack-",
+    )
+    return key in known_exact or key.startswith(known_prefixes)
 
 
 def normalize_state(raw: Any) -> dict[str, dict[str, bool]]:
@@ -49,6 +61,15 @@ def write_state(path: Path, state: dict[str, dict[str, bool]]) -> None:
     tmp_path.replace(path)
 
 
+def route_path(path: str) -> str:
+    route = path.split("?", 1)[0]
+    if route in {"/sprites", "/sprites/", "/sprites/index.html"}:
+        return "/index.html"
+    if route in {"/sprites/compare", "/sprites/compare/"}:
+        return "/compare.html"
+    return path
+
+
 class SpriteRequestHandler(SimpleHTTPRequestHandler):
     state_path = DEFAULT_STATE_PATH
 
@@ -69,6 +90,7 @@ class SpriteRequestHandler(SimpleHTTPRequestHandler):
         if self.path == "/api/state":
             self._send_json(read_state(self.state_path))
             return
+        self.path = route_path(self.path)
         super().do_GET()
 
     def do_POST(self) -> None:

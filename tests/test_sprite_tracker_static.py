@@ -24,12 +24,27 @@ def test_tracker_has_collected_and_mastered_controls():
     assert "state = normalizeState(imported)" in html
 
 
+def test_tracker_exports_and_imports_short_codes_backwards_compatibly():
+    html = INDEX.read_text()
+
+    assert 'const CODE_PREFIX = "spr1."' in html
+    assert "encodeStateCode" in html
+    assert "decodeStateCode" in html
+    assert "parseStateInput" in html
+    assert "toUrlBase64" in html
+    assert "fromUrlBase64" in html
+    assert "if (text.startsWith(CODE_PREFIX))" in html
+    assert "state = normalizeState(parseStateInput(dataBox.value))" in html
+    assert "dataBox.value = encodeStateCode(state)" in html
+    assert "JSON.parse(text)" in html
+
+
 def test_tracker_renders_visible_reference_count():
     html = INDEX.read_text()
 
     assert "SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length" in html
     assert "spriteTotalLabel.textContent = SPRITE_TOTAL" in html
-    assert 'id="spriteTotalLabel">83</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">91</span> sprite variants' in html
 
 
 def test_tracker_has_progress_and_filtering():
@@ -114,9 +129,8 @@ def test_tracker_uses_requested_sprite_row_order():
         '"Demon Sprite",',
         '"Punk Sprite",',
         '"King Sprite",',
-        '"Pollo Sprite",',
-        '"Vini Jr. Sprite",',
         '"Burnt Peanut",',
+        '"Vini Jr. Sprite",',
         '"Fishy Sprite",',
         '"Striker Sprite",',
         '"Aura Sprite",',
@@ -125,6 +139,7 @@ def test_tracker_uses_requested_sprite_row_order():
         '"Air Sprite",',
         '"Seven Sprite",',
         '"John Wick Sprite",',
+        '"Pollo Sprite",',
     ]
     positions = [group_order_block.index(item) for item in expected_order]
     assert positions == sorted(positions)
@@ -324,11 +339,11 @@ def test_tracker_syncs_released_holofoil_variants():
         assert "released: false" in snippet
 
     assert 'name: "Holofoil Burnt Peanut"' not in html
-    assert 'id="spriteTotalLabel">83</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">91</span> sprite variants' in html
 
     entries = re.findall(r'\{ id: .*? released: (true|false), variant:', html)
     assert len(entries) == 148
-    assert entries.count("true") == 83
+    assert entries.count("true") == 91
 
 
 def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
@@ -340,6 +355,7 @@ def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
         "Gummy Batman Sprite",
         "Galaxy Batman Sprite",
         "Holofoil Batman Sprite",
+        "Cube Batman Sprite",
         "Pollo Sprite",
         "Vini Jr. Sprite",
         "Air Sprite",
@@ -355,7 +371,6 @@ def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
     ]
     unreleased = [
         "Gem Batman Sprite",
-        "Cube Batman Sprite",
         "Quack Batman Sprite",
         "Gem Air Sprite",
         "Cube Air Sprite",
@@ -371,6 +386,47 @@ def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
     for name in unreleased:
         snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
         assert "released: false" in snippet
+
+
+def test_tracker_syncs_july_twenty_third_fortnitegg_releases():
+    html = INDEX.read_text()
+
+    newly_released = [
+        "Cube Batman Sprite",
+        "Cube Earth Sprite",
+        "Cube Fire Sprite",
+        "Cube Dream Sprite",
+        "Cube Punk Sprite",
+        "Cube Fishy Sprite",
+        "Cube Boss Sprite",
+        "Cube Grim Sprite",
+    ]
+    still_unreleased = [
+        "Quack Batman Sprite",
+        "Cube Water Sprite",
+        "Cube Duck Sprite",
+        "Cube Ghost Sprite",
+        "Cube King Sprite",
+        "Cube Zero Point Sprite",
+        "Cube Air Sprite",
+        "Cube Seven Sprite",
+        "John Wick Sprite",
+        "Pollo Sprite",
+    ]
+    for name in newly_released:
+        snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
+        assert "released: true" in snippet
+    for name in still_unreleased[:-1]:
+        snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
+        assert "released: false" in snippet
+
+    pollo = html.split('name: "Pollo Sprite"', 1)[1].split("},", 1)[0]
+    assert "released: true" in pollo
+
+    assert 'id="spriteTotalLabel">91</span> sprite variants' in html
+    assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "0%", released: true' in html
+    assert '{ id: "mat6", name: "Holofoil Water Sprite", image: "assets/sprites/mat6.webp", rarity: "special", dropRate: "0.25%", released: true' in html
+    assert '{ id: "mat49", name: "Burnt Peanut", image: "assets/sprites/mat49.webp", rarity: "mythic", dropRate: "0%", released: true' in html
 
 
 def test_tracker_includes_complete_fortnitegg_unreleased_catalog():
