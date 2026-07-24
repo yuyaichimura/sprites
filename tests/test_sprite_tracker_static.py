@@ -21,7 +21,7 @@ def test_tracker_has_collected_and_mastered_controls():
     assert "localStorage" in html
     assert "spriteTrackerState" in html
     assert "const next = { ...source }" in html
-    assert "state = normalizeState(imported)" in html
+    assert "state = normalizeState(parseStateInput(dataBox.value))" in html
 
 
 def test_tracker_exports_and_imports_short_codes_backwards_compatibly():
@@ -131,6 +131,7 @@ def test_tracker_uses_requested_sprite_row_order():
         '"King Sprite",',
         '"Burnt Peanut",',
         '"Vini Jr. Sprite",',
+        '"Zero Point Sprite",',
         '"Fishy Sprite",',
         '"Striker Sprite",',
         '"Aura Sprite",',
@@ -143,6 +144,13 @@ def test_tracker_uses_requested_sprite_row_order():
     ]
     positions = [group_order_block.index(item) for item in expected_order]
     assert positions == sorted(positions)
+
+
+def test_cube_and_quack_sprites_group_as_variants():
+    html = INDEX.read_text()
+
+    assert 'const variantPrefixes = ["Gold", "Gummy", "Galaxy", "Gem", "Holofoil", "Cube", "Quack"]' in html
+    assert 'variantClass = sprite.variant.toLowerCase()' in html
 
 
 def test_tracker_downloads_sprite_assets_locally():
@@ -251,7 +259,7 @@ def test_tracker_includes_fortnitegg_metadata():
     assert "rarity" in html
     assert "dropRate" in html
     assert "availability" in html
-    assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "12.83%", released: true' in html
+    assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "0%", released: true' in html
     assert '{ id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: true' in html
 
 
