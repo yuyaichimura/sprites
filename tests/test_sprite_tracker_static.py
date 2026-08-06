@@ -258,6 +258,9 @@ def test_tracker_includes_fortnitegg_metadata():
 
     assert "rarity" in html
     assert "dropRate" in html
+    assert "availability" in html
+    assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "0%", released: true' in html
+    assert '{ id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: true' in html
 
 
 def test_tracker_syncs_current_fortnitegg_sprite_total():
@@ -318,9 +321,18 @@ def test_tracker_includes_new_ironmouse_llama_and_peely_sprites():
         "holofoil-peely.webp",
     ]:
         assert (SPRITE_ASSETS / filename).exists()
-    assert "availability" in html
-    assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "0%", released: true' in html
-    assert '{ id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: true' in html
+
+
+def test_released_quack_assets_match_current_fortnitegg_art():
+    expected_hashes = {
+        "quack-water.webp": "a4f055e25e80a1937f9040b414bb8723fb992357fe9148a48e4a0fea7e74aaca",
+        "quack-earth.webp": "8a6aae45b5016377413213182e65ff06f4d0d11c2349bab8a2bd3e42457e8fa1",
+        "quack-fire.webp": "17d73f880dc4cbc12f4ac5b8c062c8723f9211c26d32ee364b5160e889c4f0ad",
+        "quack-zero-point.webp": "0a604369c49aa023aeb84a5df1188e4e1bc4a5706c9b8dc7e279175ca623e3d5",
+    }
+
+    for filename, expected_hash in expected_hashes.items():
+        assert hashlib.sha256((SPRITE_ASSETS / filename).read_bytes()).hexdigest() == expected_hash
 
 
 def test_sprite_cards_show_verified_player_skills_only():
