@@ -44,7 +44,7 @@ def test_tracker_renders_visible_reference_count():
 
     assert "SPRITE_TOTAL = spriteAssets.filter((sprite) => sprite.released).length" in html
     assert "spriteTotalLabel.textContent = SPRITE_TOTAL" in html
-    assert 'id="spriteTotalLabel">91</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">117</span> sprite variants' in html
 
 
 def test_tracker_has_progress_and_filtering():
@@ -156,7 +156,7 @@ def test_cube_and_quack_sprites_group_as_variants():
 def test_tracker_downloads_sprite_assets_locally():
     assert (SPRITE_ASSETS / "mat1.webp").exists()
     assert (SPRITE_ASSETS / "v4110-soccer-striker.webp").exists()
-    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 148
+    assert len(list(SPRITE_ASSETS.glob("*.webp"))) == 159
     assert not (SPRITE_ASSETS / "fortnitegg").exists()
     assert not (SPRITE_ASSETS / "mat0.webp").exists()
 
@@ -258,6 +258,66 @@ def test_tracker_includes_fortnitegg_metadata():
 
     assert "rarity" in html
     assert "dropRate" in html
+
+
+def test_tracker_syncs_current_fortnitegg_sprite_total():
+    html = INDEX.read_text()
+
+    assert html.count("{ id: ") == 159
+    assert html.count("released: true") == 117
+    assert html.count("released: false") == 42
+    assert "{ id: \"john-wick\", name: \"John Wick Sprite\", image: \"assets/sprites/john-wick.webp\", rarity: \"mythic\", dropRate: \"0%\", released: true" in html
+    assert "{ id: \"batman\", name: \"Batman Sprite\", image: \"assets/sprites/batman.webp\", rarity: \"mythic\", dropRate: \"1.44%\", released: true" in html
+    assert "{ id: \"mat49\", name: \"Burnt Peanut\", image: \"assets/sprites/mat49.webp\", rarity: \"mythic\", dropRate: \"2.14%\", released: true" in html
+    assert "{ id: \"vini-jr\", name: \"Vini Jr. Sprite\", image: \"assets/sprites/vini-jr.webp\", rarity: \"mythic\", dropRate: \"2.14%\", released: true" in html
+    assert "{ id: \"v4110-seven\", name: \"Seven Sprite\", image: \"assets/sprites/v4110-seven.webp\", rarity: \"legendary\", dropRate: \"3.63%\", released: true" in html
+    assert "{ id: \"v4110-holofoil-seven\", name: \"Holofoil Seven Sprite\", image: \"assets/sprites/v4110-holofoil-seven.webp\", rarity: \"special\", dropRate: \"0.85%\", released: true" in html
+
+
+def test_tracker_marks_newly_released_variants_from_fortnitegg():
+    html = INDEX.read_text()
+
+    assert "{ id: \"quack-water\", name: \"Quack Water Sprite\", image: \"assets/sprites/quack-water.webp\", rarity: \"special\", dropRate: \"0%\", released: true" in html
+    assert "{ id: \"mat5\", name: \"Gem Water Sprite\", image: \"assets/sprites/mat5.webp\", rarity: \"special\", dropRate: \"0.37%\", released: true" in html
+    assert "{ id: \"mat23\", name: \"Gem Duck Sprite\", image: \"assets/sprites/mat23.webp\", rarity: \"special\", dropRate: \"0.1%\", released: true" in html
+    assert "{ id: \"cube-zero-point\", name: \"Cube Zero Point Sprite\", image: \"assets/sprites/cube-zero-point.webp\", rarity: \"special\", dropRate: \"0.000014%\", released: true" in html
+    assert "{ id: \"gem-grim\", name: \"Gem Grim Sprite\", image: \"assets/sprites/gem-grim.webp\", rarity: \"special\", dropRate: \"0.00099%\", released: true" in html
+    assert "{ id: \"v4110-holofoil-grim-reaper\", name: \"Holofoil Grim Sprite\", image: \"assets/sprites/v4110-holofoil-grim-reaper.webp\", rarity: \"special\", dropRate: \"0%\", released: true" in html
+
+
+def test_tracker_includes_new_ironmouse_llama_and_peely_sprites():
+    html = INDEX.read_text()
+
+    expected_entries = [
+        "{ id: \"ironmouse\", name: \"Ironmouse Sprite\", image: \"assets/sprites/ironmouse.webp\", rarity: \"mythic\", dropRate: \"2.14%\", released: true, variant: \"Base\" }",
+        "{ id: \"llama\", name: \"Llama Sprite\", image: \"assets/sprites/llama.webp\", rarity: \"legendary\", dropRate: \"4.45%\", released: true, variant: \"Base\" }",
+        "{ id: \"gold-llama\", name: \"Gold Llama Sprite\", image: \"assets/sprites/gold-llama.webp\", rarity: \"special\", dropRate: \"0.43%\", released: true, variant: \"Gold\"",
+        "{ id: \"gummy-llama\", name: \"Gummy Llama Sprite\", image: \"assets/sprites/gummy-llama.webp\", rarity: \"special\", dropRate: \"0.26%\", released: true, variant: \"Gummy\"",
+        "{ id: \"galaxy-llama\", name: \"Galaxy Llama Sprite\", image: \"assets/sprites/galaxy-llama.webp\", rarity: \"special\", dropRate: \"0.17%\", released: true, variant: \"Galaxy\"",
+        "{ id: \"gem-llama\", name: \"Gem Llama Sprite\", image: \"assets/sprites/gem-llama.webp\", rarity: \"special\", dropRate: \"0%\", released: true, variant: \"Gem\"",
+        "{ id: \"peely\", name: \"Peely Sprite\", image: \"assets/sprites/peely.webp\", rarity: \"legendary\", dropRate: \"4.62%\", released: true, variant: \"Base\" }",
+        "{ id: \"gold-peely\", name: \"Gold Peely Sprite\", image: \"assets/sprites/gold-peely.webp\", rarity: \"special\", dropRate: \"0.43%\", released: true, variant: \"Gold\"",
+        "{ id: \"gummy-peely\", name: \"Gummy Peely Sprite\", image: \"assets/sprites/gummy-peely.webp\", rarity: \"special\", dropRate: \"0.26%\", released: true, variant: \"Gummy\"",
+        "{ id: \"galaxy-peely\", name: \"Galaxy Peely Sprite\", image: \"assets/sprites/galaxy-peely.webp\", rarity: \"special\", dropRate: \"0.17%\", released: true, variant: \"Galaxy\"",
+        "{ id: \"holofoil-peely\", name: \"Holofoil Peely Sprite\", image: \"assets/sprites/holofoil-peely.webp\", rarity: \"special\", dropRate: \"0.85%\", released: true, variant: \"Holofoil\"",
+    ]
+    for entry in expected_entries:
+        assert entry in html
+
+    for filename in [
+        "ironmouse.webp",
+        "llama.webp",
+        "gold-llama.webp",
+        "gummy-llama.webp",
+        "galaxy-llama.webp",
+        "gem-llama.webp",
+        "peely.webp",
+        "gold-peely.webp",
+        "gummy-peely.webp",
+        "galaxy-peely.webp",
+        "holofoil-peely.webp",
+    ]:
+        assert (SPRITE_ASSETS / filename).exists()
     assert "availability" in html
     assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "0%", released: true' in html
     assert '{ id: "v4110-air", name: "Air Sprite", image: "assets/sprites/v4110-air.webp", rarity: "rare", dropRate: "0%", released: true' in html
@@ -324,6 +384,9 @@ def test_tracker_syncs_released_holofoil_variants():
         "Holofoil Batman Sprite",
         "Holofoil Air Sprite",
         "Holofoil Seven Sprite",
+        "Holofoil Zero Point Sprite",
+        "Holofoil Grim Sprite",
+        "Holofoil Peely Sprite",
     ]
     unreleased_holofoils = [
         "Holofoil Earth Sprite",
@@ -331,11 +394,9 @@ def test_tracker_syncs_released_holofoil_variants():
         "Holofoil Dream Sprite",
         "Holofoil Demon Sprite",
         "Holofoil Punk Sprite",
-        "Holofoil Zero Point Sprite",
         "Holofoil Fishy Sprite",
         "Holofoil Aura Sprite",
         "Holofoil Boss Sprite",
-        "Holofoil Grim Sprite",
     ]
     for name in released_holofoils:
         assert f'name: "{name}"' in html
@@ -347,11 +408,11 @@ def test_tracker_syncs_released_holofoil_variants():
         assert "released: false" in snippet
 
     assert 'name: "Holofoil Burnt Peanut"' not in html
-    assert 'id="spriteTotalLabel">91</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">117</span> sprite variants' in html
 
     entries = re.findall(r'\{ id: .*? released: (true|false), variant:', html)
-    assert len(entries) == 148
-    assert entries.count("true") == 91
+    assert len(entries) == 159
+    assert entries.count("true") == 117
 
 
 def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
@@ -376,6 +437,7 @@ def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
         "Gummy Seven Sprite",
         "Galaxy Seven Sprite",
         "Holofoil Seven Sprite",
+        "John Wick Sprite",
     ]
     unreleased = [
         "Gem Batman Sprite",
@@ -386,7 +448,6 @@ def test_tracker_syncs_july_sixteenth_fortnitegg_releases():
         "Gem Seven Sprite",
         "Cube Seven Sprite",
         "Quack Seven Sprite",
-        "John Wick Sprite",
     ]
     for name in released:
         snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
@@ -408,6 +469,7 @@ def test_tracker_syncs_july_twenty_third_fortnitegg_releases():
         "Cube Fishy Sprite",
         "Cube Boss Sprite",
         "Cube Grim Sprite",
+        "Cube Zero Point Sprite",
     ]
     still_unreleased = [
         "Quack Batman Sprite",
@@ -415,26 +477,20 @@ def test_tracker_syncs_july_twenty_third_fortnitegg_releases():
         "Cube Duck Sprite",
         "Cube Ghost Sprite",
         "Cube King Sprite",
-        "Cube Zero Point Sprite",
         "Cube Air Sprite",
         "Cube Seven Sprite",
-        "John Wick Sprite",
-        "Pollo Sprite",
     ]
-    for name in newly_released:
+    for name in [*newly_released, "John Wick Sprite", "Pollo Sprite"]:
         snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
         assert "released: true" in snippet
-    for name in still_unreleased[:-1]:
+    for name in still_unreleased:
         snippet = html.split(f'name: "{name}"', 1)[1].split("},", 1)[0]
         assert "released: false" in snippet
 
-    pollo = html.split('name: "Pollo Sprite"', 1)[1].split("},", 1)[0]
-    assert "released: true" in pollo
-
-    assert 'id="spriteTotalLabel">91</span> sprite variants' in html
+    assert 'id="spriteTotalLabel">117</span> sprite variants' in html
     assert '{ id: "mat1", name: "Water Sprite", image: "assets/sprites/mat1.webp", rarity: "rare", dropRate: "0%", released: true' in html
-    assert '{ id: "mat6", name: "Holofoil Water Sprite", image: "assets/sprites/mat6.webp", rarity: "special", dropRate: "0.25%", released: true' in html
-    assert '{ id: "mat49", name: "Burnt Peanut", image: "assets/sprites/mat49.webp", rarity: "mythic", dropRate: "0%", released: true' in html
+    assert '{ id: "mat6", name: "Holofoil Water Sprite", image: "assets/sprites/mat6.webp", rarity: "special", dropRate: "0.53%", released: true' in html
+    assert '{ id: "mat49", name: "Burnt Peanut", image: "assets/sprites/mat49.webp", rarity: "mythic", dropRate: "2.14%", released: true' in html
 
 
 def test_tracker_includes_complete_fortnitegg_unreleased_catalog():

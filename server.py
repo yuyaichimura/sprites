@@ -13,7 +13,17 @@ DEFAULT_STATE_PATH = ROOT / "sprite-state.json"
 
 
 def is_sprite_key(key: str) -> bool:
-    known_exact = {"batman", "pollo", "vini-jr", "john-wick", "holofoil-duck", "holofoil-demon"}
+    known_exact = {
+        "batman",
+        "ironmouse",
+        "llama",
+        "peely",
+        "pollo",
+        "vini-jr",
+        "john-wick",
+        "holofoil-duck",
+        "holofoil-demon",
+    }
     known_prefixes = (
         "mat",
         "v4110-",
